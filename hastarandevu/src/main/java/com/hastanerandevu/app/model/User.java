@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Column(nullable = false)
     private String name;
