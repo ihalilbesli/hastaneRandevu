@@ -42,5 +42,12 @@ public class Appointments {
     public enum Status{
     AKTIF,IPTAL_EDILDI
     }
+    @PrePersist
+    @PreUpdate
+    protected void formatTime() {
+        if (this.time != null) {
+            this.time = this.time.withSecond(0).withNano(0);
+        }
+    }
 
 }
