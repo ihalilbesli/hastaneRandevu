@@ -38,12 +38,12 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String gender;
+    private Gender gender;
 
     @Column
-    private LocalDate birthDate;
+    private String birthDate;
 
     @Column
     private String bloodTyper;  //(hasta icin)
@@ -54,20 +54,11 @@ public class User {
     @Column
     private String specialization; //uzmanlik (doktor icin)
 
+
     public enum Role {
         HASTA, DOKTOR, ADMIN
     }
-
-    @PrePersist
-    protected void onCreate() {
-        this.birthDate = generateRandomBirthDate();
-}
-private LocalDate generateRandomBirthDate(){
-    // Rastgele bir tarih oluştur (1950 ile 2022 arası)
-    long minDay = LocalDate.of(1970, 1, 1).toEpochDay();
-    long maxDay = LocalDate.of(2020, 12, 31).toEpochDay();
-    long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
-
-    return LocalDate.ofEpochDay(randomDay);
+    public enum Gender{
+        ERKEK,KADIN,BELIRTILMEMIS
     }
 }
