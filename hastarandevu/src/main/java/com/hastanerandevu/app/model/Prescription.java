@@ -4,20 +4,21 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "prescriptions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Appointments {
-
+public class Prescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  long id;
+    private Long id;
+
+    @Column(unique = true, length = 10)
+    private String prescriptionCode;  //Recete kodu
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -27,20 +28,9 @@ public class Appointments {
     @JoinColumn(name = "doctor_id", nullable = false)
     private User doctor;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String medications; // İlaç listesi
+
     @Column(nullable = false)
     private LocalDate date;
-
-    @Column(nullable = false)
-    private LocalTime time;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    private Status status=Status.AKTIF;
-
-    public enum Status{
-    AKTIF,IPTAL_EDILDI
-    }
-
 }

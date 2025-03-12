@@ -4,20 +4,18 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "patient_history")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Appointments {
-
+public class PatientHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -30,17 +28,12 @@ public class Appointments {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
-    private LocalTime time;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String diagnosis;       //tani
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String treatment; //tedavi
 
     @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    private Status status=Status.AKTIF;
-
-    public enum Status{
-    AKTIF,IPTAL_EDILDI
-    }
-
+    private String notes;  //Genel notlar
 }
