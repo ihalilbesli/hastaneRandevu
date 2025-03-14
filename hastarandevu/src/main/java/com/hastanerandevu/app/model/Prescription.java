@@ -22,15 +22,15 @@ public class Prescription {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User patient;
+    private User patient; // Hasta
 
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
-    private User doctor;
+    private User doctor; //Doktor
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String medications; // İlaç listesi
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDate date; // Recete Tarih
 }
