@@ -37,7 +37,8 @@ public class Appointments {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private Status status=Status.AKTIF;
+    @Column(nullable = false)
+    private Status status;
 
     public enum Status{
     AKTIF,IPTAL_EDILDI

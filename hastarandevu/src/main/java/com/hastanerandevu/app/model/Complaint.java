@@ -3,6 +3,8 @@ package com.hastanerandevu.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "complaint")
 @Getter
@@ -27,7 +29,7 @@ public class Complaint {
     private Status status=Status.BEKLEMEDE;
 
     @Column(nullable = false,updatable = false)
-    private String createdAt;
+    private LocalDate createdAt=LocalDate.now();
 
     public enum Status {
         BEKLEMEDE, COZULDU

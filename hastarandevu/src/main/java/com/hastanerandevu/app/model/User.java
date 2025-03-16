@@ -3,10 +3,6 @@ package com.hastanerandevu.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.util.concurrent.ThreadLocalRandom;
-
-
 @Entity
 @Table(name = "users")
 @Getter
@@ -45,8 +41,9 @@ public class User {
     @Column
     private String birthDate;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String bloodTyper;  //(hasta icin)
+    private Bloodtype  bloodType;  //(hasta icin)
 
     @Column
     private String chronicDiseases; //kronik rahatsizlik (hasta icin)
@@ -61,4 +58,8 @@ public class User {
     public enum Gender{
         ERKEK,KADIN,BELIRTILMEMIS
     }
+    public enum Bloodtype{
+        ARH_POS, ARH_NEG, BRH_POS, BRH_NEG, ABRH_POS, ABRH_NEG, ORH_POS, ORH_NEG
+    }
+
 }

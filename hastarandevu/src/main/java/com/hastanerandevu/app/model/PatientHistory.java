@@ -26,7 +26,7 @@ public class PatientHistory {
     private User doctor; //Doktor
 
     @Column(nullable = false)
-    private LocalDate date; //TEshis tarihi
+    private LocalDate date; //Teshis tarihi
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String diagnosis;       //tani
