@@ -23,9 +23,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     // İsme göre kullanıcı arama (Admin paneli için)
     List<User> findByNameContainingIgnoreCase(String name);
 
-    // İsme ve soyisme göre kullanıcı arama
-    List<User> findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(String name, String surname);
-
     // Cinsiyete göre kullanıcı listeleme
     List<User> findByGender(User.Gender gender);
 

@@ -28,9 +28,6 @@ public interface UserService {
     // İsme göre kullanıcı arama
     List<User> findByNameContainingIgnoreCase(String name);
 
-    // İsme ve soyisme göre kullanıcı arama
-    List<User> findByNameContainingIgnoreCaseAndSurnameContainingIgnoreCase(String name, String surname);
-
     // Cinsiyete göre kullanıcı listeleme
     List<User> findByGender(User.Gender gender);
 
