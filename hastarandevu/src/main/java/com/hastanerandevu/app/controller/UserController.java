@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/hastarandevu/users")
 public class UserController {
     private final UserService userService;
 
@@ -101,7 +101,7 @@ public class UserController {
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();//test
         }
     }
 
