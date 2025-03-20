@@ -1,7 +1,8 @@
-package com.hastanerandevu.app.service;
+package com.hastanerandevu.app.service.impl;
 
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.UserRepository;
+import com.hastanerandevu.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Autowired

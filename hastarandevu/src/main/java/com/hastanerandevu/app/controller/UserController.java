@@ -5,6 +5,7 @@ import com.hastanerandevu.app.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +34,10 @@ public class UserController {
     public ResponseEntity<List<User>> getUserByRole(@PathVariable User.Role role){
         List<User> users=userService.findUsersByRole(role);
         if (!users.isEmpty()){
-            return ResponseEntity.ok(users);
+            return ResponseEntity.ok(users); // Kullanıcılar varsa 200 OK döndür
         }
         else
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
     }
     // ID ile kullanıcıyı getir
     @GetMapping("/{id}")
@@ -68,7 +69,7 @@ public class UserController {
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
         }
     }
     // Cinsiyete göre kullanıcı listeleme
@@ -79,7 +80,7 @@ public class UserController {
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
         }
     }
     // Kan grubuna göre hasta listeleme
@@ -90,7 +91,7 @@ public class UserController {
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
         }
     }
     // Uzmanlık alanına göre doktorları listeleme
@@ -101,7 +102,7 @@ public class UserController {
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
-            return ResponseEntity.notFound().build();//test
+            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
         }
     }
 
