@@ -7,7 +7,7 @@ public interface AuthService {
     User register(User user);
 
     // Kullanıcı giriş işlemi
-    String login(String email,String password);
+    User loginUser(String email,String password);
 
     // Şifre hashleme işlemi
     String encodePassword(String password);

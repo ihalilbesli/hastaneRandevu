@@ -52,7 +52,7 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claimsResolver.apply(claims);//ssss
+        return claimsResolver.apply(claims);    //metod token içindeki bilgileri çekmek için genişletilebilir
     }
 
 

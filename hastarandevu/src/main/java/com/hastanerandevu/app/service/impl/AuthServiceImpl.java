@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Kullanıcı giriş işlemi
     @Override
-    public String login(String email, String password) {
+    public User loginUser(String email, String password) {
         Optional<User> userOptional=userRepository.findByEmail(email);
         //email kontrolu
         if (userOptional.isEmpty()){
@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Gecersiz email veya sifre");
         }
         // JWT token oluştur ve döndür
-        return jwtUtil.generateToken(user);
+        return user;
 
     }
 
