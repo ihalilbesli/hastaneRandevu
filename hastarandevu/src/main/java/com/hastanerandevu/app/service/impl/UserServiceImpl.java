@@ -1,8 +1,8 @@
 package com.hastanerandevu.app.service.impl;
 
 import com.hastanerandevu.app.model.User;
-import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.UserService;
+import com.hastanerandevu.app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
