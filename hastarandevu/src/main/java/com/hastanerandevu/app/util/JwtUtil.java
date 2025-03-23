@@ -11,7 +11,8 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private static final String secretKey="ctrlAltDeleteSecretKey";//Token icin gizli anahtar
+    private static final String secretKey = "ctrlAltDeleteSuperSecretKey123456789121234567893456789123456789";
+    // en az 32 karakter Token icin gizli anahtar
     private static final long expirationTime=1000*60*60;//1 saat gecerli
 
     //kullancii icin JWT token olusturma
