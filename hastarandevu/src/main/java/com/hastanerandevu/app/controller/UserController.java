@@ -18,7 +18,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    // Email ile kullanıcı bulma
+    // Email ile kullanıcı bulma             http://localhost:8080/hastarandevu/users/email{mehmet@example.com}
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email){
         Optional<User> userOptional=userService.findByEmail(email);

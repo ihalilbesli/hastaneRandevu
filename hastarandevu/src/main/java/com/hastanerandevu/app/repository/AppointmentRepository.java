@@ -32,7 +32,7 @@ public interface AppointmentRepository extends JpaRepository<Appointments,Long> 
 
 
     // Belirli bir doktor için belirli bir tarih ve saat için çakışma var mı?
-    Optional<Appointments> findByDoctorAndDateAndTime(User doctor, LocalDate date, LocalTime time);
+    List<Appointments> findByDoctorAndDateAndTime(User doctor, LocalDate date, LocalTime time);
     //Hasta ayni gun ayni saate 2 farkli randevu alabilir mi
     Optional<Appointments> findByPatientAndDateAndTime(User patient, LocalDate date, LocalTime time);
 

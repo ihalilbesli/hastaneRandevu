@@ -55,9 +55,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public boolean isDoctorAvailable(Long doctorId, LocalDate date, LocalTime time) {
-        return appointmentRepository.findByDoctorAndDateAndTime(User.builder().id(doctorId).build(),date,time)
-                .isEmpty();
+        User doctor=userRepository.findById(doctorId).orElseThrow();
+        return appointmentRepository.findByDoctorAndDateAndTime(doctor,date,time).isEmpty();
     }
+
 
     @Override
     public void deteAppointment(Long id) {
