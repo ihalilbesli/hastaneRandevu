@@ -46,6 +46,26 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public List<Complaint> getAllComplaint() {
+        return complaintRepository.findAll();
+    }
+
+    @Override
+    public List<Complaint> getComplaintByStatus(Complaint.Status status) {
+        return complaintRepository.findByStatus(status);
+    }
+
+    @Override
+    public Complaint updateComplaint(Long id, Complaint updatedComplaint) {
+        Complaint complaint=complaintRepository.findById(id).orElseThrow(()->new RuntimeException("Sikayet Bulunamadi: "+id));
+
+        complaint.setContent(updatedComplaint.getContent());
+        complaint.setStatus(updatedComplaint.getStatus());
+
+        return  complaintRepository.save(complaint);
+    }
+
+    @Override
     public void deleteComplaint(Long id) {
 
     }

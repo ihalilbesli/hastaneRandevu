@@ -24,6 +24,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint,Long> {
 
     // Kullanıcının son X gün içindeki şikayetlerini getir
     List<Complaint> findByUserAndCreatedAtAfter(User user, LocalDate date); //(Hasta icin)
+
     List<Complaint> findByCreatedAtAfter(LocalDate date); //(Admin icin)
 
     // Kullanıcı rollerine göre şikayetleri listele (Hasta, Doktor, Admin)

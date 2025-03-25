@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/hastarandevu/auth/**").permitAll()
                         .requestMatchers("/hastarandevu/appointments/**").permitAll() // Gecici olarak tum endpointler
+                        .requestMatchers("/hastarandevu/complaints/**").permitAll()//Gecici olarak tum endpointler
+
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

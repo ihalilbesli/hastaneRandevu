@@ -3,10 +3,7 @@ package com.hastanerandevu.app.controller;
 import com.hastanerandevu.app.model.Complaint;
 import com.hastanerandevu.app.service.ComplaintService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,4 +23,31 @@ public class ComplaintController {
         List<Complaint> complaints=complaintService.getComplaintByUserIdAndDate(userId,period);
         return ResponseEntity.ok(complaints);
     }
+
+    @GetMapping
+    public ResponseEntity<List<Complaint>> getAllComplaint(){
+        return ResponseEntity.ok(complaintService.getAllComplaint());
+    }
+
+    @PostMapping
+    public ResponseEntity<Complaint> createComplaint(@RequestBody Complaint complaint){
+        return ResponseEntity.ok(complaintService.createComplaint(complaint));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCeomplaint(@PathVariable Long id){
+        complaintService.deleteComplaint(id);
+        return ResponseEntity.noContent().build();
+    }
+    //  Statusune gore göre filtrele
+    @GetMapping("/status")
+    public ResponseEntity<List<Complaint>> getComplaintsByStatus(@RequestParam Complaint.Status status) {
+        return ResponseEntity.ok(complaintService.getComplaintByStatus(status));
+    }
+
+    //Sikayeti guncelleme
+    @PutMapping("/{id}")
+    public ResponseEntity<Complaint> updateComplaint(@PathVariable Long id, @RequestBody Complaint updatedComplaint) {
+        return ResponseEntity.ok(complaintService.updateComplaint(id, updatedComplaint));
+    }
+
 }
