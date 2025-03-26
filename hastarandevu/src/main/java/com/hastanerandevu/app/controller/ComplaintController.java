@@ -15,6 +15,11 @@ public class ComplaintController {
     public ComplaintController(ComplaintService complaintService) {
         this.complaintService = complaintService;
     }
+
+    @GetMapping("/user/{id}")
+    public  ResponseEntity<List<Complaint>> getComplaintByUserId(@PathVariable Long id){
+        return ResponseEntity.ok(complaintService.getComplaintByUserId(id));
+    }
     //  Kullanıcının son  zaman içindeki şikayetlerini getir
     @GetMapping("/filter")
     public ResponseEntity<List<Complaint>> getComplaintByDate(

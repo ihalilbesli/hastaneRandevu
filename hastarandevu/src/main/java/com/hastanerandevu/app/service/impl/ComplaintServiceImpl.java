@@ -22,6 +22,9 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public Complaint createComplaint(Complaint complaint) {
+        Long userId=complaint.getUser().getId();
+        User user=userRepository.findById(userId).orElseThrow();
+        complaint.setUser(user);
         return complaintRepository.save(complaint);
     }
 
