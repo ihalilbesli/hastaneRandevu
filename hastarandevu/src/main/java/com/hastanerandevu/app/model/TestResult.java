@@ -37,5 +37,17 @@ public class TestResult {
     @Column(nullable = false)
     private LocalDate testDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TestType testType;
+
+    public enum TestType {
+        KAN_TAHLILI,
+        IDRAR_TAHLILI,
+        MRI,
+        TOMOGRAFI,
+        DIGER
+    }
+
 
 }
