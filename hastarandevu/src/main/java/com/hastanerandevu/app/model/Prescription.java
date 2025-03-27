@@ -33,4 +33,8 @@ public class Prescription {
 
     @Column(nullable = false)
     private LocalDate date; // Recete Tarih
+
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String description;
+
 }
