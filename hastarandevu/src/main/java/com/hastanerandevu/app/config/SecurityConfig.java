@@ -28,7 +28,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)throws Exception{//http://localhost:8080/swagger-ui/index.html
         httpSecurity.csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/hastarandevu/auth/**").permitAll()
@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/hastarandevu/prescriptions/**").permitAll()//Gecici olarak tum endpointler
                         .requestMatchers("/hastarandevu/patient-history/**").permitAll()//Gecici olarak tum endpointler
                         .requestMatchers("/hastarandevu/patient-report/**").permitAll()//Gecici olarak tum endpointler
+                        .requestMatchers( "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html").permitAll()//Gecici olarak tum endpointler
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
