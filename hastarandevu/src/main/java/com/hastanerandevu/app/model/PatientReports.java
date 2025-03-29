@@ -18,6 +18,10 @@ public class PatientReports {
     private long id;
 
     @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private User patient;
+
+    @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private User doctor; // Raporu ekleyen doktor
 

@@ -35,7 +35,9 @@ public class SecurityConfig {
                         .requestMatchers("/hastarandevu/appointments/**").permitAll() // Gecici olarak tum endpointler
                         .requestMatchers("/hastarandevu/complaints/**").permitAll()//Gecici olarak tum endpointler
                         .requestMatchers("/hastarandevu/test-result/**").permitAll()//Gecici olarak tum endpointler
-                        .requestMatchers("hastarandevu/prescriptions/**").permitAll()//Gecici olarak tum endpointler
+                        .requestMatchers("/hastarandevu/prescriptions/**").permitAll()//Gecici olarak tum endpointler
+                        .requestMatchers("/hastarandevu/patient-history/**").permitAll()//Gecici olarak tum endpointler
+                        .requestMatchers("/hastarandevu/patient-report/**").permitAll()//Gecici olarak tum endpointler
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
