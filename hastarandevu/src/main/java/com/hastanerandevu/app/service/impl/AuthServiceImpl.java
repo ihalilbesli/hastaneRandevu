@@ -4,7 +4,10 @@ import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.AuthService;
 import com.hastanerandevu.app.util.JwtUtil;
+import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +31,26 @@ public class AuthServiceImpl implements AuthService {
     //Kullanici kayit islemi
     @Override
     public User register(User user) {
+        //  1. Şu an kim giriş yapmış, onu alıyoruz (anonymous olabilir)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        //  2. Eğer giriş yapılmamışsa veya anonymous kullanıcıysa (yani normal kullanıcı kayıt oluyor)
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            // ️ Bu durumda sistem otomatik olarak rolü HASTA yapar
+            user.setRole(User.Role.HASTA);
+        } else {
+            // 👮 3. Giriş yapılmışsa ve kayıt olunuyorsa → sadece ADMIN kayıt yapabilir
+            if (!SecurityUtil.hasRole("ADMIN")) {
+                throw new RuntimeException("Sadece admin başka rol ile kullanıcı oluşturabilir.");
+            }
+        }
+
+
         user.setPassword(encodePassword(user.getPassword()));
+
         return userRepository.save(user);
     }
+
 
     // Kullanıcı giriş işlemi
     @Override
