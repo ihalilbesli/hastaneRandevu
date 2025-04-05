@@ -5,6 +5,7 @@ import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.PatientHistoryRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.PatientHistoryService;
+import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,28 +21,41 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
         this.userRepository = userRepository;
     }
 
-    // Yeni gecmis bilgisi olusturur
+    /**
+     * Yeni geçmiş bilgisi oluşturur.
+     * Sadece DOKTOR rolündeki kullanıcılar ekleme yapabilir.
+     */
     @Override
     public PatientHistory createHistory(PatientHistory history) {
-        User doctor=userRepository.findById(history.getDoctor().getId())
-                .orElseThrow(()->new RuntimeException("Doktor Bulunamadi"));
-        if (doctor.getRole()!=User.Role.DOKTOR){
-            throw new RuntimeException("Sadece Doktor ekleme yapabilir");
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (!SecurityUtil.hasRole("DOCTOR")) {
+            throw new RuntimeException("Sadece doktorlar geçmiş bilgisi ekleyebilir.");
         }
+
         User patient = userRepository.findById(history.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadi"));
-        history.setDoctor(doctor);
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+
+        history.setDoctor(currentUser);
         history.setPatient(patient);
         history.setDate(LocalDate.now());
 
         return patientHistoryRepository.save(history);
     }
 
-    // Gecmis bilgisini gunceller
+    /**
+     * Geçmiş bilgisini günceller.
+     * Sadece DOKTOR veya ADMIN yapabilir.
+     */
     @Override
     public PatientHistory updateHistory(Long id, PatientHistory updatedHistory) {
+        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece doktor veya admin geçmiş bilgisi güncelleyebilir.");
+        }
+
         PatientHistory history = patientHistoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Gecmis bilgisi bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Geçmiş bilgisi bulunamadı"));
 
         history.setNotes(updatedHistory.getNotes());
         history.setDiagnosis(updatedHistory.getDiagnosis());
@@ -50,77 +64,145 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
         return patientHistoryRepository.save(history);
     }
 
-    // Gecmis bilgisini siler (doktor veya admin)
+    /**
+     * Geçmiş bilgisini siler.
+     * Sadece DOKTOR veya ADMIN yapabilir.
+     */
     @Override
     public void deleteHistory(Long id) {
-         patientHistoryRepository.deleteById(id);
+        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece doktor veya admin geçmiş bilgisi silebilir.");
+        }
+
+        patientHistoryRepository.deleteById(id);
     }
 
-    // ID ile gecmis bilgisini getirir
+    /**
+     * ID ile geçmiş bilgisi getirir.
+     */
     @Override
     public PatientHistory getHistoryById(Long id) {
         return patientHistoryRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Gecmis Bilgisi Bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Geçmiş bilgisi bulunamadı"));
     }
 
-    // Tum gecmis bilgilerini listeler
+    /**
+     * Tüm geçmiş bilgilerini listeler.
+     * Sadece ADMIN erişebilir.
+     */
     @Override
     public List<PatientHistory> getAllHistories() {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin tüm geçmiş bilgilerini görebilir.");
+        }
+
         return patientHistoryRepository.findAll();
     }
 
-    // Hastaya ait gecmis bilgilerini getirir
+    /**
+     * Hastaya ait geçmiş bilgilerini getirir.
+     * Hasta kendi geçmişini görebilir, doktor/admin tüm hastaları görebilir.
+     */
     @Override
     public List<PatientHistory> getHistoriesByPatientId(Long patientId) {
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görebilirsiniz.");
+        }
+
         User patient = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+
         return patientHistoryRepository.findByPatient(patient);
     }
 
-    // Doktorun ekledigi gecmis bilgilerini getirir
+    /**
+     * Doktorun eklediği geçmiş bilgilerini getirir.
+     * Sadece kendisi veya admin görebilir.
+     */
     @Override
     public List<PatientHistory> getHistoriesByDoctorId(Long doctorId) {
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi kayıtlarınızı görebilirsiniz.");
+        }
+
         User doctor = userRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doktor bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
+
         return patientHistoryRepository.findByDoctor(doctor);
     }
 
-    // Hastaya ait zaman filtresiyle listeleme yapar
+    /**
+     * Hastaya ait geçmiş bilgilerini zaman filtresiyle getirir.
+     * Hasta kendi verisini görebilir, admin/doktor tüm hastaları görebilir.
+     */
     @Override
     public List<PatientHistory> getHistoriesByPatientIdAndPeriod(Long patientId, String period) {
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görüntüleyebilirsiniz.");
+        }
+
         User patient = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+
         LocalDate startDate = calculateStartDate(period);
         return patientHistoryRepository.findByPatientAndDateAfter(patient, startDate);
     }
 
-    // Doktora ait zaman filtresiyle listeleme yapar
+    /**
+     * Doktora ait geçmiş bilgilerini zaman filtresiyle getirir.
+     * Sadece kendisi veya admin görebilir.
+     */
     @Override
     public List<PatientHistory> getHistoriesByDoctorIdAndPeriod(Long doctorId, String period) {
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görüntüleyebilirsiniz.");
+        }
+
         User doctor = userRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doktor bulunamadi"));
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
+
         LocalDate startDate = calculateStartDate(period);
         return patientHistoryRepository.findByDoctorAndDateAfter(doctor, startDate);
     }
 
-    // Tani icerigine gore arama yapar
+    /**
+     * Tani (diagnosis) içeriğine göre geçmiş bilgilerini arar.
+     */
     @Override
     public List<PatientHistory> searchHistoriesByDiagnosis(String keyword) {
         return patientHistoryRepository.findByDiagnosisContainingIgnoreCase(keyword);
     }
 
-    // Tedavi icerigine gore arama yapar
+    /**
+     * Tedavi (treatment) içeriğine göre geçmiş bilgilerini arar.
+     */
     @Override
     public List<PatientHistory> searchHistoriesByTreatment(String keyword) {
-         return patientHistoryRepository.findByTreatmentContainingIgnoreCase(keyword);
+        return patientHistoryRepository.findByTreatmentContainingIgnoreCase(keyword);
     }
+
+    /**
+     * Periyoda göre başlangıç tarihini hesaplar.
+     */
     private LocalDate calculateStartDate(String period) {
         return switch (period.toLowerCase()) {
             case "day" -> LocalDate.now().minusDays(1);
             case "week" -> LocalDate.now().minusWeeks(1);
             case "month" -> LocalDate.now().minusMonths(1);
             case "year" -> LocalDate.now().minusYears(1);
-            default -> throw new IllegalArgumentException("Gecersiz zaman araligi: " + period);
+            default -> throw new IllegalArgumentException("Geçersiz zaman aralığı: " + period);
         };
     }
 }

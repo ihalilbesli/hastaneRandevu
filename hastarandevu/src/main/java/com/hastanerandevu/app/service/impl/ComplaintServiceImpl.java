@@ -5,6 +5,7 @@ import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.ComplaintRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.ComplaintService;
+import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 public class ComplaintServiceImpl implements ComplaintService {
+
     private final ComplaintRepository complaintRepository;
     private final UserRepository userRepository;
 
@@ -20,56 +22,118 @@ public class ComplaintServiceImpl implements ComplaintService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Kullanıcı şikayet oluşturur.
+     * Yalnızca giriş yapan kullanıcı kendi adına şikayet oluşturabilir.
+     */
     @Override
     public Complaint createComplaint(Complaint complaint) {
-        Long userId=complaint.getUser().getId();
-        User user=userRepository.findById(userId).orElseThrow();
-        complaint.setUser(user);
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        Long userId = complaint.getUser().getId();
+        User targetUser = userRepository.findById(userId).orElseThrow();
+
+        // Güvenlik: Sadece kendi adına şikayet yapılabilir
+        if (currentUser.getId()!=(targetUser.getId())) {
+            throw new RuntimeException("Sadece kendi adınıza şikayet oluşturabilirsiniz.");
+        }
+
+        complaint.setUser(targetUser);
         return complaintRepository.save(complaint);
     }
 
+    /**
+     * Kullanıcı ID’sine göre şikayetleri getirir.
+     * Kullanıcı kendi şikayetlerini görebilir, admin tüm kullanıcıları görebilir.
+     */
     @Override
     public List<Complaint> getComplaintByUserId(Long id) {
-        User user=userRepository.findById(id).orElseThrow();
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        if (currentUser.getId()!=(id) && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi şikayetlerinizi görüntüleyebilirsiniz.");
+        }
+
+        User user = userRepository.findById(id).orElseThrow();
         return complaintRepository.findByUser(user);
     }
 
+    /**
+     * Kullanıcının belirli zaman aralığında yaptığı şikayetleri getirir.
+     * Zaman periyodu: week, month, year
+     */
     @Override
     public List<Complaint> getComplaintByUserIdAndDate(Long userId, String period) {
-        LocalDate date;
-        switch (period.toLowerCase()){
-            case "week"->date=LocalDate.now().minusWeeks(1);
-            case "month"->date=LocalDate.now().minusMonths(1);
-            case "year"->date=LocalDate.now().minusYears(1);
-            default -> throw new IllegalArgumentException("Gecersiz Zaman Secimi "+ period);
+        String email = SecurityUtil.getCurrentUserEmail();
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
 
+        if (currentUser.getId()!=(userId) && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece kendi şikayet geçmişinizi görüntüleyebilirsiniz.");
         }
-        User user=userRepository.findById(userId).orElseThrow();
-        return complaintRepository.findByUserAndCreatedAtAfter(user,date);
+
+        LocalDate date;
+        switch (period.toLowerCase()) {
+            case "week" -> date = LocalDate.now().minusWeeks(1);
+            case "month" -> date = LocalDate.now().minusMonths(1);
+            case "year" -> date = LocalDate.now().minusYears(1);
+            default -> throw new IllegalArgumentException("Geçersiz Zaman Seçimi: " + period);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow();
+        return complaintRepository.findByUserAndCreatedAtAfter(user, date);
     }
 
+    /**
+     * Tüm şikayetleri getirir. Sadece admin erişebilir.
+     */
     @Override
     public List<Complaint> getAllComplaint() {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin tüm şikayetleri görüntüleyebilir.");
+        }
         return complaintRepository.findAll();
     }
 
+    /**
+     * Şikayet durumuna göre filtreleme yapılır.
+     * Admin ve doktorlar erişebilir.
+     */
     @Override
     public List<Complaint> getComplaintByStatus(Complaint.Status status) {
+        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOCTOR")) {
+            throw new RuntimeException("Bu işlemi yalnızca yetkili kişiler görüntüleyebilir.");
+        }
         return complaintRepository.findByStatus(status);
     }
 
+    /**
+     * Şikayet güncellenir. Sadece admin ve doktorlar şikayet durumunu güncelleyebilir.
+     */
     @Override
     public Complaint updateComplaint(Long id, Complaint updatedComplaint) {
-        Complaint complaint=complaintRepository.findById(id).orElseThrow(()->new RuntimeException("Sikayet Bulunamadi: "+id));
+        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOCTOR")) {
+            throw new RuntimeException("Sadece admin veya doktorlar şikayet güncelleyebilir.");
+        }
+
+        Complaint complaint = complaintRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Şikayet Bulunamadı: " + id));
 
         complaint.setContent(updatedComplaint.getContent());
         complaint.setStatus(updatedComplaint.getStatus());
 
-        return  complaintRepository.save(complaint);
+        return complaintRepository.save(complaint);
     }
 
+    /**
+     * Şikayet silinir (opsiyonel). Sadece admin silebilir.
+     */
     @Override
     public void deleteComplaint(Long id) {
-
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin şikayet silebilir.");
+        }
+        complaintRepository.deleteById(id);
     }
 }
