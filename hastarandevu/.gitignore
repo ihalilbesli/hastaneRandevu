@@ -32,4 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 logs/
+src/main/resources/application-secret.properties
+application-secret.properties
+
 
