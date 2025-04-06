@@ -31,7 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+# logs klasörünü tamamen ignore et
 logs/
+**/logs/
+*.log
+
 src/main/resources/application-secret.properties
 application-secret.properties
 
