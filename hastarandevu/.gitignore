@@ -39,5 +39,5 @@ application-secret.properties
 # logs klasörünü tamamen ignore et
 logs/
 **/logs/
-*.logD
+*.log
 
