@@ -21,6 +21,6 @@ public class SecurityUtil {
     public static User getCurrentUser(UserRepository userRepository) {
         String email = getCurrentUserEmail();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));//
     }
 }
