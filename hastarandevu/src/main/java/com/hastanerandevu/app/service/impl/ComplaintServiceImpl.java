@@ -28,7 +28,7 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public Complaint createComplaint(Complaint complaint) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         Long userId = complaint.getUser().getId();
@@ -49,7 +49,7 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public List<Complaint> getComplaintByUserId(Long id) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId()!=(id) && !SecurityUtil.hasRole("ADMIN")) {
@@ -66,7 +66,7 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public List<Complaint> getComplaintByUserIdAndDate(Long userId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId()!=(userId) && !SecurityUtil.hasRole("ADMIN")) {

@@ -27,7 +27,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public PatientHistory createHistory(PatientHistory history) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (!SecurityUtil.hasRole("DOCTOR")) {
@@ -105,7 +105,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public List<PatientHistory> getHistoriesByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -124,7 +124,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public List<PatientHistory> getHistoriesByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
@@ -143,7 +143,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public List<PatientHistory> getHistoriesByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -163,7 +163,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public List<PatientHistory> getHistoriesByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {

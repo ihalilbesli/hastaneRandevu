@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtil {
     // Şu anki kullanıcının email'ini döner
-    public static String getCurrentUserEmail() {
+    public static String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
@@ -19,7 +19,7 @@ public class SecurityUtil {
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_" + roleName));
     }
     public static User getCurrentUser(UserRepository userRepository) {
-        String email = getCurrentUserEmail();
+        String email = getCurrentUserId();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));//
     }

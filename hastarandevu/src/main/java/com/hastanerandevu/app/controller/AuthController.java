@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.controller;
 
+import com.hastanerandevu.app.dto.AuthResponse;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.AuthService;
 import com.hastanerandevu.app.util.JwtUtil;
@@ -27,12 +28,12 @@ public class AuthController {
     }
     //  Giriş işlemi
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         User user = authService.loginUser(loginRequest.getEmail(),loginRequest.getPassword());
 
         // Giriş başarılıysa JWT token üret
         String token = jwtUtil.generateToken(user);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new AuthResponse(token));
     }
     public static class LoginRequest {
         private String email;

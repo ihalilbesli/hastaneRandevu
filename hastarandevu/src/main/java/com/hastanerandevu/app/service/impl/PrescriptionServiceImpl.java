@@ -29,7 +29,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public Prescription createPrescription(Prescription prescription) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentDoctor = userRepository.findByEmail(email).orElseThrow();
 
         if (!SecurityUtil.hasRole("DOCTOR")) {
@@ -72,7 +72,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reçete bulunamadı."));
 
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (prescription.getDoctor().getId()!=(currentUser.getId()) &&
@@ -90,7 +90,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
@@ -109,7 +109,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
@@ -127,7 +127,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
@@ -146,7 +146,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {

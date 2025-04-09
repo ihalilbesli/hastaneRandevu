@@ -34,7 +34,7 @@ public class AIServiceImpl implements AIService {
      */
     @Override
     public String analyzeComplaint(String complaintText) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
 
         if (!SecurityUtil.hasRole("HASTA")) {
             throw new RuntimeException("Yapay zeka sadece HASTA kullanıcılar tarafından kullanılabilir.");

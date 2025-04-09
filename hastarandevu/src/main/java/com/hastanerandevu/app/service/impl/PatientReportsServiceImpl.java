@@ -28,7 +28,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
      */
     @Override
     public PatientReports createReport(PatientReports report) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentDoctor = userRepository.findByEmail(email).orElseThrow();
 
         if (!SecurityUtil.hasRole("DOCTOR")) {
@@ -63,7 +63,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
      */
     @Override
     public List<PatientReports> getReportsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
@@ -79,7 +79,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
      */
     @Override
     public List<PatientReports> getReportsByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
@@ -95,7 +95,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
      */
     @Override
     public List<PatientReports> getReportsByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
@@ -115,7 +115,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
      */
     @Override
     public List<PatientReports> getReportsByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {

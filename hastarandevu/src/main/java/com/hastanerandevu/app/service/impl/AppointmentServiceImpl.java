@@ -31,7 +31,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public Appointments createAppointment(Appointments appointments) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (!SecurityUtil.hasRole("PATIENT")) {
@@ -56,7 +56,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public List<Appointments> getAppointemnrsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId()!=(patientId) && !SecurityUtil.hasRole("ADMIN")) {
@@ -74,7 +74,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public List<Appointments> getAppointmensByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
         if (currentUser.getId()!=(doctorId) && !SecurityUtil.hasRole("ADMIN")) {
