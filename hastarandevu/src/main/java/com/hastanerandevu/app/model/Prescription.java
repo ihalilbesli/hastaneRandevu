@@ -24,17 +24,17 @@ public class Prescription {
     @JoinColumn(name = "user_id", nullable = false)
     private User patient; // Hasta
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private User doctor; //Doktor
+@ManyToOne
+@JoinColumn(name = "doctor_id", nullable = false)
+private User doctor; //Doktor
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String medications; // İlaç listesi
+@Column(nullable = false, columnDefinition = "TEXT")
+private String medications; // İlaç listesi
 
-    @Column(nullable = false)
-    private LocalDate date; // Recete Tarih
+@Column(nullable = false)
+private LocalDate date; // Recete Tarih
 
-    @Column(nullable = true, columnDefinition = "TEXT")
-    private String description;
+@Column(nullable = true, columnDefinition = "TEXT")
+private String description;
 
 }

@@ -34,7 +34,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String email = SecurityUtil.getCurrentUserId();
         User currentUser = userRepository.findByEmail(email).orElseThrow();
 
-        if (!SecurityUtil.hasRole("PATIENT")) {
+        if (!SecurityUtil.hasRole("HASTA")) {
             throw new RuntimeException("Sadece hastalar randevu oluşturabilir.");
         }
 

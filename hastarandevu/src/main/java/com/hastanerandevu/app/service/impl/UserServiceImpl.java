@@ -125,14 +125,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByBloodType(bloodType);
     }
 
-    /**
-     * Uzmanlık alanına göre doktorları arar. (Admin ve Doktor)
-     */
+
+     //Uzmanlık alanına göre doktorları arar. (Admin ve Doktor)
+
     @Override
     public List<User> findBySpecializationContainingIgnoreCase(String specialization) {
-        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOCTOR")) {
-            throw new RuntimeException("Sadece admin veya doktor arama yapabilir.");
-        }
+
         return userRepository.findBySpecializationContainingIgnoreCase(specialization);
     }
 }
