@@ -43,4 +43,6 @@ public interface AppointmentRepository extends JpaRepository<Appointments,Long> 
     // Belirli bir doktorun **aktif** randevularını listeleme
     List<Appointments> findByDoctorAndStatus(User doctor, Appointments.Status status);
 
+    List<Appointments> findByDoctorIdAndDate(Long doctorId, LocalDate date);
+
 }

@@ -67,4 +67,14 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
+    //Doktorun musait randevu saatlerini dondurur
+    @GetMapping("/doctor/{id}/date")
+    public ResponseEntity<List<Appointments>> getAppointmentsByDoctorAndDate(
+            @PathVariable Long id,
+            @RequestParam String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        List<Appointments> appointments = appointmentService.getAppointmentsByDoctorIdAndDate(id, localDate);
+        return ResponseEntity.ok(appointments);
+    }
+
 }

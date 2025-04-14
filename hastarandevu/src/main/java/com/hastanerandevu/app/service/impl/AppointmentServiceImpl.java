@@ -27,7 +27,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * Yeni bir randevu oluşturur.
-     * Sadece PATIENT rolündeki kullanıcılar kendi adlarına randevu oluşturabilir.
+     * Sadece HASTA rolündeki kullanıcılar kendi adlarına randevu oluşturabilir.
      */
     @Override
     public Appointments createAppointment(Appointments appointments) {
@@ -122,5 +122,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Sadece admin tüm randevuları görüntüleyebilir.");
         }
         return appointmentRepository.findAll();
+    }
+
+    @Override
+    public List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
+
+        if (!SecurityUtil.hasRole("HASTA") && !SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece hasta ve adminler görüntüleyebilir.");
+        }
+        return appointmentRepository.findByDoctorIdAndDate(doctorId, date);
     }
 }

@@ -28,4 +28,6 @@ public interface AppointmentService {
 
     // Tüm randevuları getir
     List<Appointments> getAllAppointments();
+
+    List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date);
 }
