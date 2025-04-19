@@ -36,6 +36,10 @@ public class Appointments {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
+    private String clinic;
+
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status= Status.valueOf("AKTIF");

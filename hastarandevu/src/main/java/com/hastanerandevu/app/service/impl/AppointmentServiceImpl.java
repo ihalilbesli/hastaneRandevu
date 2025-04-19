@@ -45,10 +45,25 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Sadece kendi adınıza randevu oluşturabilirsiniz.");
         }
 
+        //  Aynı klinikte aktif randevu kontrolü
+        Optional<Appointments> existing = appointmentRepository
+                .findByPatientIdAndClinicAndStatus(patient.getId(), doctor.getSpecialization(), Appointments.Status.AKTIF);
+
+        existing.ifPresent(a -> {
+            a.setStatus(Appointments.Status.IPTAL_EDILDI);
+            appointmentRepository.save(a);
+        });
+
+        //  Klinik bilgisini set et!
+        appointments.setClinic(doctor.getSpecialization());
+
         appointments.setPatient(patient);
         appointments.setDoctor(doctor);
+        appointments.setStatus(Appointments.Status.AKTIF);
+
         return appointmentRepository.save(appointments);
     }
+
 
     /**
      * Belirli bir hasta ID’sine ait tüm randevuları döner.
@@ -63,9 +78,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
         }
 
-        return appointmentRepository.findAll().stream()
+        List<Appointments> appointments = appointmentRepository.findAll().stream()
                 .filter(a -> a.getPatient().getId()==(patientId))
                 .toList();
+        updateExpiredAppointments(appointments);
+        return appointments;
     }
 
     /**
@@ -123,6 +140,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         return appointmentRepository.findAll();
     }
+    @Override
+    public void cancelAppointment(Long id) {
+        Appointments appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Randevu bulunamadı."));
+
+        if (appointment.getStatus() == Appointments.Status.AKTIF) {
+            appointment.setStatus(Appointments.Status.IPTAL_EDILDI);
+            appointmentRepository.save(appointment);
+        } else {
+            throw new RuntimeException("Randevu zaten iptal edilmiş.");
+        }
+    }
 
     @Override
     public List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
@@ -131,5 +160,15 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Sadece hasta ve adminler görüntüleyebilir.");
         }
         return appointmentRepository.findByDoctorIdAndDate(doctorId, date);
+    }
+    private void updateExpiredAppointments(List<Appointments> appointments) {
+        LocalDate today = LocalDate.now();
+
+        for (Appointments a : appointments) {
+            if (a.getDate().isBefore(today) && a.getStatus() == Appointments.Status.AKTIF) {
+                a.setStatus(Appointments.Status.IPTAL_EDILDI);
+                appointmentRepository.save(a);
+            }
+        }
     }
 }

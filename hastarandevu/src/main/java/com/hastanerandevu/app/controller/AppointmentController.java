@@ -1,7 +1,9 @@
 package com.hastanerandevu.app.controller;
 
 import com.hastanerandevu.app.model.Appointments;
+import com.hastanerandevu.app.repository.AppointmentRepository;
 import com.hastanerandevu.app.service.AppointmentService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +16,11 @@ import java.util.Optional;
 @RequestMapping("/hastarandevu/appointments")
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final AppointmentRepository appointmentRepository;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, AppointmentRepository appointmentRepository) {
         this.appointmentService = appointmentService;
+        this.appointmentRepository = appointmentRepository;
     }
 
     // Randevu oluştur
@@ -76,5 +80,20 @@ public class AppointmentController {
         List<Appointments> appointments = appointmentService.getAppointmentsByDoctorIdAndDate(id, localDate);
         return ResponseEntity.ok(appointments);
     }
+    @GetMapping("/patient/{id}")
+    public ResponseEntity<List<Appointments>> getAppointmentsByPatient(@PathVariable Long id) {
+        List<Appointments> appointments = appointmentService.getAppointemnrsByPatientId(id);
+        return ResponseEntity.ok(appointments);
+    }
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id){
+        try {
+            appointmentService.cancelAppointment(id);
+            return ResponseEntity.ok("Randevu iptal edildi.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
 }

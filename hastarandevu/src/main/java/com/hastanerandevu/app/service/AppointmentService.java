@@ -30,4 +30,6 @@ public interface AppointmentService {
     List<Appointments> getAllAppointments();
 
     List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date);
+
+    void cancelAppointment(Long id);
 }
