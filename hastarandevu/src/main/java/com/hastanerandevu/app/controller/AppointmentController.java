@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -86,12 +87,17 @@ public class AppointmentController {
         return ResponseEntity.ok(appointments);
     }
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> cancelAppointment(@PathVariable Long id){
-        try {
-            appointmentService.cancelAppointment(id);
-            return ResponseEntity.ok("Randevu iptal edildi.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ResponseEntity<Map<String, String>> cancelAppointment(@PathVariable Long id) {
+        Appointments appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Randevu bulunamadı."));
+
+        if (appointment.getStatus() == Appointments.Status.AKTIF) {
+            appointment.setStatus(Appointments.Status.IPTAL_EDILDI);
+            appointmentRepository.save(appointment);
+            return ResponseEntity.ok(Map.of("message", "Randevu iptal edildi."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Randevu zaten iptal edilmiş."));
         }
     }
 
