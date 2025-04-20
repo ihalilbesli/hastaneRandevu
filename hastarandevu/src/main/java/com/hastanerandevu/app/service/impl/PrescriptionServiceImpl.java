@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -23,23 +24,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Yeni reçete oluşturur.
-     * Sadece DOKTOR rolündeki kullanıcılar kendi adına reçete yazabilir.
-     */
-
     @Override
     public Prescription createPrescription(Prescription prescription) {
-        // Login olan kullanıcıyı getir
         User currentDoctor = SecurityUtil.getCurrentUser(userRepository);
-        System.out.println("Login olan kullanıcı rolü: " + currentDoctor.getRole().name());
 
-        // Rol kontrolü yap
-        if (!currentDoctor.getRole().name().equals("DOKTOR")) {
+        if (currentDoctor.getRole() != User.Role.DOKTOR) {
             throw new RuntimeException("Reçete sadece doktor tarafından oluşturulabilir.");
         }
 
-        // Hasta kontrolü
         User patient = userRepository.findById(prescription.getPatient().getId())
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
@@ -47,17 +39,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         prescription.setPatient(patient);
         prescription.setDate(LocalDate.now());
 
-        // Reçete kodu oluştur
         String randomPart = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8).toUpperCase();
         prescription.setPrescriptionCode("RX" + randomPart);
 
         return prescriptionRepository.save(prescription);
     }
 
-    /**
-     * Tüm reçeteleri döner.
-     * Sadece ADMIN erişebilir.
-     */
     @Override
     public List<Prescription> getAllPrescriptions() {
         if (!SecurityUtil.hasRole("ADMIN")) {
@@ -66,10 +53,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         return prescriptionRepository.findAll();
     }
 
-    /**
-     * Reçeteyi ID ile getirir.
-     * Reçete doktoru, hastası veya admin görebilir.
-     */
     @Override
     public Prescription getPrescriptionById(Long id) {
         Prescription prescription = prescriptionRepository.findById(id)
@@ -77,101 +60,78 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (prescription.getDoctor().getId()!=(currentUser.getId()) &&
-                prescription.getPatient().getId()!=(currentUser.getId()) &&
-                !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(prescription.getDoctor().getId(), currentUser.getId())
+                && !Objects.equals(prescription.getPatient().getId(), currentUser.getId())
+                && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Bu reçeteye erişim izniniz yok.");
         }
 
         return prescription;
     }
 
-    /**
-     * Hastaya ait reçeteleri döner.
-     * Sadece hasta kendisi veya admin görebilir.
-     */
     @Override
     public List<Prescription> getPrescriptionsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi reçetelerinizi görebilirsiniz.");
         }
 
         User patient = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
         return prescriptionRepository.findByPatient(patient);
     }
 
-    /**
-     * Doktora ait reçeteleri döner.
-     * Sadece doktor kendisi veya admin görebilir.
-     */
     @Override
     public List<Prescription> getPrescriptionsByDoctorId(Long doctorId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi yazdığınız reçeteleri görebilirsiniz.");
         }
 
         User doctor = userRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı."));
 
         return prescriptionRepository.findByDoctor(doctor);
     }
 
-    /**
-     * Hastaya ait belirli zaman aralığındaki reçeteleri döner.
-     */
     @Override
     public List<Prescription> getPrescriptionsByPatientIdAndPeriod(Long patientId, String period) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi reçetelerinizi görüntüleyebilirsiniz.");
         }
 
         User patient = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
         LocalDate startDate = calculateStartDate(period);
         return prescriptionRepository.findByPatientAndDateAfter(patient, startDate);
     }
 
-    /**
-     * Doktora ait belirli zaman aralığındaki reçeteleri döner.
-     */
     @Override
     public List<Prescription> getPrescriptionsByDoctorIdAndPeriod(Long doctorId, String period) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi yazdığınız reçeteleri görüntüleyebilirsiniz.");
         }
 
         User doctor = userRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı."));
 
         LocalDate startDate = calculateStartDate(period);
         return prescriptionRepository.findByDoctorAndDateAfter(doctor, startDate);
     }
 
-    /**
-     * Açıklama içeriğine göre reçetelerde arama yapar.
-     */
     @Override
     public List<Prescription> searchPrescriptionsByKeyword(String keyword) {
         return prescriptionRepository.findByDescriptionContainingIgnoreCase(keyword);
     }
 
-    /**
-     * Reçeteyi günceller.
-     * Sadece doktor veya admin yapabilir.
-     */
     @Override
     public Prescription updatePrescription(Long id, Prescription updatedPrescription) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -179,16 +139,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
 
         Prescription existing = prescriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reçete bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Reçete bulunamadı."));
 
         existing.setDescription(updatedPrescription.getDescription());
         return prescriptionRepository.save(existing);
     }
 
-    /**
-     * Reçeteyi siler.
-     * Sadece admin veya doktor silebilir.
-     */
     @Override
     public void deletePrescription(Long id) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -198,9 +154,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         prescriptionRepository.deleteById(id);
     }
 
-    /**
-     * Verilen zaman periyoduna göre başlangıç tarihi hesaplar.
-     */
     private LocalDate calculateStartDate(String period) {
         return switch (period.toLowerCase()) {
             case "day" -> LocalDate.now().minusDays(1);

@@ -6,10 +6,7 @@ import com.hastanerandevu.app.service.DoctorPatientService;
 import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,11 +17,11 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
     private final PatientReportRepository patientReportRepository;
     private final UserRepository userRepository;
 
-
     public DoctorPatientServiceImpl(PrescriptionRepository prescriptionRepository,
                                     TestResultRepository testResultRepository,
                                     PatientHistoryRepository patientHistoryRepository,
-                                    PatientReportRepository patientReportRepository, UserRepository userRepository) {
+                                    PatientReportRepository patientReportRepository,
+                                    UserRepository userRepository) {
         this.prescriptionRepository = prescriptionRepository;
         this.testResultRepository = testResultRepository;
         this.patientHistoryRepository = patientHistoryRepository;
@@ -32,29 +29,31 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
         this.userRepository = userRepository;
     }
 
-    // Doktorun geçmişte işlem yaptığı tüm hastaları tekilleştirip döner
+    /**
+     * Doktorun geçmişte işlem yaptığı tüm hastaları tekilleştirip döner.
+     * Sadece DOKTOR rolü erişebilir.
+     */
     @Override
     public List<User> getMyPatients() {
         User currentDoctor = SecurityUtil.getCurrentUser(userRepository);
 
+        if (currentDoctor.getRole() != User.Role.DOKTOR) {
+            throw new RuntimeException("Sadece doktorlar kendi hastalarını görüntüleyebilir.");
+        }
+
         Set<User> uniquePatients = new HashSet<>();
 
-        // Reçetelerden hastaları topla
         prescriptionRepository.findByDoctor(currentDoctor).forEach(p -> uniquePatients.add(p.getPatient()));
-
-        // Test sonuçlarından hastaları topla
         testResultRepository.findByDoctor(currentDoctor).forEach(t -> uniquePatients.add(t.getPatient()));
-
-        // Hasta geçmişlerinden hastaları topla
         patientHistoryRepository.findByDoctor(currentDoctor).forEach(h -> uniquePatients.add(h.getPatient()));
-
-        // Raporlardan hastaları topla
         patientReportRepository.findByDoctor(currentDoctor).forEach(r -> uniquePatients.add(r.getPatient()));
 
         return new ArrayList<>(uniquePatients);
     }
 
-    // Doktorun işlem yaptığı hastalardan isme göre arama
+    /**
+     * Doktorun işlem yaptığı hastalardan isme göre arama.
+     */
     @Override
     public List<User> searchMyPatientsByName(String name) {
         return getMyPatients().stream()
@@ -62,7 +61,9 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
                 .collect(Collectors.toList());
     }
 
-    // Doktorun işlem yaptığı hastalardan email’e göre arama
+    /**
+     * Doktorun işlem yaptığı hastalardan email’e göre arama.
+     */
     @Override
     public List<User> searchMyPatientsByEmail(String emailPart) {
         return getMyPatients().stream()

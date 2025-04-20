@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TestResultServiceImpl implements TestResultService {
@@ -22,16 +23,11 @@ public class TestResultServiceImpl implements TestResultService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Yeni test sonucu oluşturur.
-     * Sadece giriş yapan doktor kendi adına sonuç ekleyebilir.
-     */
     @Override
     public TestResult createTestResult(TestResult testResult) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentDoctor = userRepository.findByEmail(email).orElseThrow();
+        User currentDoctor = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!SecurityUtil.hasRole("DOCTOR")) {
+        if (currentDoctor.getRole() != User.Role.DOKTOR) {
             throw new RuntimeException("Test sonucu sadece doktor tarafından eklenebilir.");
         }
 
@@ -44,16 +40,11 @@ public class TestResultServiceImpl implements TestResultService {
         return testResultRepository.save(testResult);
     }
 
-    /**
-     * Hastaya ait test sonuçlarını getirir.
-     * Sadece hasta kendisi veya admin erişebilir.
-     */
     @Override
     public List<TestResult> getTestResultsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
         }
 
@@ -62,16 +53,11 @@ public class TestResultServiceImpl implements TestResultService {
         return testResultRepository.findByPatient(patient);
     }
 
-    /**
-     * Doktora ait test sonuçlarını getirir.
-     * Sadece ilgili doktor veya admin görebilir.
-     */
     @Override
     public List<TestResult> getTestResultsByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
         }
 
@@ -80,10 +66,6 @@ public class TestResultServiceImpl implements TestResultService {
         return testResultRepository.findByDoctor(doctor);
     }
 
-    /**
-     * Tüm test sonuçlarını listeler.
-     * Sadece admin erişebilir.
-     */
     @Override
     public List<TestResult> getAllTestResults() {
         if (!SecurityUtil.hasRole("ADMIN")) {
@@ -92,10 +74,6 @@ public class TestResultServiceImpl implements TestResultService {
         return testResultRepository.findAll();
     }
 
-    /**
-     * Test sonucunu günceller.
-     * Sadece doktor veya admin yapabilir.
-     */
     @Override
     public TestResult updateTestResult(Long id, TestResult updatedResult) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -114,10 +92,6 @@ public class TestResultServiceImpl implements TestResultService {
         return testResultRepository.save(result);
     }
 
-    /**
-     * Test sonucunu siler.
-     * Sadece doktor veya admin silebilir.
-     */
     @Override
     public void deleteTestResult(Long id) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -127,47 +101,36 @@ public class TestResultServiceImpl implements TestResultService {
         testResultRepository.deleteById(id);
     }
 
-    /**
-     * Hastaya ait belirli zaman aralığındaki test sonuçlarını getirir.
-     */
     @Override
     public List<TestResult> getTestResultsByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi test geçmişinizi görüntüleyebilirsiniz.");
         }
 
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
-        LocalDate date = calculateStartDate(period);
-        return testResultRepository.findByPatientAndTestDateAfter(patient, date);
+        LocalDate startDate = calculateStartDate(period);
+        return testResultRepository.findByPatientAndTestDateAfter(patient, startDate);
     }
 
-    /**
-     * Doktora ait belirli zaman aralığındaki test sonuçlarını getirir.
-     */
     @Override
     public List<TestResult> getTestResultsByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (!Objects.equals(currentUser.getId(), doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
         }
 
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doktor bulunamadı."));
 
-        LocalDate date = calculateStartDate(period);
-        return testResultRepository.findByDoctorAndTestDateAfter(doctor, date);
+        LocalDate startDate = calculateStartDate(period);
+        return testResultRepository.findByDoctorAndTestDateAfter(doctor, startDate);
     }
 
-    /**
-     * Zaman aralığına göre başlangıç tarihini hesaplar.
-     */
     private LocalDate calculateStartDate(String period) {
         return switch (period.toLowerCase()) {
             case "day" -> LocalDate.now().minusDays(1);

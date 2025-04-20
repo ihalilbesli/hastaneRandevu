@@ -22,16 +22,11 @@ public class PatientReportsServiceImpl implements PatientReportsService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Yeni hasta raporu oluşturur.
-     * Sadece DOKTOR rolüne sahip kullanıcılar oluşturabilir.
-     */
     @Override
     public PatientReports createReport(PatientReports report) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentDoctor = userRepository.findByEmail(email).orElseThrow();
+        User currentDoctor = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!SecurityUtil.hasRole("DOCTOR")) {
+        if (currentDoctor.getRole() != User.Role.DOKTOR) {
             throw new RuntimeException("Sadece doktorlar rapor oluşturabilir.");
         }
 
@@ -45,103 +40,71 @@ public class PatientReportsServiceImpl implements PatientReportsService {
         return reportRepository.save(report);
     }
 
-    /**
-     * Tüm hasta raporlarını döner.
-     * Sadece ADMIN erişebilir.
-     */
     @Override
     public List<PatientReports> getAllReports() {
-        if (!SecurityUtil.hasRole("ADMIN")) {
+        if (SecurityUtil.getCurrentUser(userRepository).getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece admin tüm raporları görebilir.");
         }
         return reportRepository.findAll();
     }
 
-    /**
-     * Hastaya ait raporları döner.
-     * Sadece hasta kendisi veya ADMIN görebilir.
-     */
     @Override
     public List<PatientReports> getReportsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi raporlarınızı görüntüleyebilirsiniz.");
         }
 
         return reportRepository.findByPatientId(patientId);
     }
 
-    /**
-     * Doktora ait raporları döner.
-     * Sadece ilgili doktor veya ADMIN görebilir.
-     */
     @Override
     public List<PatientReports> getReportsByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi yazdığınız raporları görüntüleyebilirsiniz.");
         }
 
         return reportRepository.findByDoctorId(doctorId);
     }
 
-    /**
-     * Hastaya ait belirli zaman aralığındaki raporları döner.
-     * Sadece ilgili hasta veya ADMIN erişebilir.
-     */
     @Override
     public List<PatientReports> getReportsByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi rapor geçmişinizi görüntüleyebilirsiniz.");
         }
 
         User patient = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
         LocalDate startDate = calculateStartDate(period);
         return reportRepository.findByPatientAndReportDateAfter(patient, startDate);
     }
 
-    /**
-     * Doktora ait belirli zaman aralığındaki raporları döner.
-     * Sadece ilgili doktor veya ADMIN erişebilir.
-     */
     @Override
     public List<PatientReports> getReportsByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi rapor geçmişinizi görüntüleyebilirsiniz.");
         }
 
         User doctor = userRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı."));
 
         LocalDate startDate = calculateStartDate(period);
         return reportRepository.findByDoctorAndReportDateAfter(doctor, startDate);
     }
 
-    /**
-     * Rapor türüne göre anahtar kelime ile arama yapar.
-     * (Gerekirse sadece giriş yapmış kullanıcıya açılabilir)
-     */
     @Override
     public List<PatientReports> searchReportsByKeyword(String keyword) {
         return reportRepository.findByReportTypeContainingIgnoreCase(keyword);
     }
 
-    /**
-     * Raporu günceller.
-     * Sadece DOKTOR veya ADMIN yapabilir.
-     */
     @Override
     public PatientReports updateReport(Long id, PatientReports updatedReport) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -157,10 +120,6 @@ public class PatientReportsServiceImpl implements PatientReportsService {
         return reportRepository.save(report);
     }
 
-    /**
-     * Raporu siler.
-     * Sadece ADMIN veya DOKTOR yapabilir.
-     */
     @Override
     public void deleteReport(Long id) {
         if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
@@ -169,9 +128,6 @@ public class PatientReportsServiceImpl implements PatientReportsService {
         reportRepository.deleteById(id);
     }
 
-    /**
-     * Verilen zaman periyoduna göre başlangıç tarihi hesaplar.
-     */
     private LocalDate calculateStartDate(String period) {
         return switch (period.toLowerCase()) {
             case "day" -> LocalDate.now().minusDays(1);

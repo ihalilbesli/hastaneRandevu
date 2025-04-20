@@ -25,26 +25,21 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Yeni bir randevu oluşturur.
-     * Sadece HASTA rolündeki kullanıcılar kendi adlarına randevu oluşturabilir.
-     */
     @Override
     public Appointments createAppointment(Appointments appointments) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!SecurityUtil.hasRole("HASTA")) {
+        if (currentUser.getRole() != User.Role.HASTA) {
             throw new RuntimeException("Sadece hastalar randevu oluşturabilir.");
         }
 
         User patient = userRepository.findById(appointments.getPatient().getId()).orElseThrow();
         User doctor = userRepository.findById(appointments.getDoctor().getId()).orElseThrow();
 
-        if (!patient.getEmail().equals(currentUser.getEmail())) {
+        if (patient.getId()!=(currentUser.getId())) {
             throw new RuntimeException("Sadece kendi adınıza randevu oluşturabilirsiniz.");
         }
 
-        //  Aynı klinikte aktif randevu kontrolü
         Optional<Appointments> existing = appointmentRepository
                 .findByPatientIdAndClinicAndStatus(patient.getId(), doctor.getSpecialization(), Appointments.Status.AKTIF);
 
@@ -53,9 +48,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointmentRepository.save(a);
         });
 
-        //  Klinik bilgisini set et!
         appointments.setClinic(doctor.getSpecialization());
-
         appointments.setPatient(patient);
         appointments.setDoctor(doctor);
         appointments.setStatus(Appointments.Status.AKTIF);
@@ -63,16 +56,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.save(appointments);
     }
 
-
-    /**
-     * Belirli bir hasta ID’sine ait tüm randevuları döner.
-     * Kullanıcı sadece kendi randevularını görebilir, admin herkesin randevusunu görebilir.
-     */
     @Override
     public List<Appointments> getAppointemnrsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(patientId) && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
         }
 
@@ -83,15 +71,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments;
     }
 
-    /**
-     * Belirli bir doktor ID’sine ait randevuları döner.
-     * Doktor kendi randevularını görebilir, admin tüm doktor randevularını görebilir.
-     */
     @Override
     public List<Appointments> getAppointmensByDoctorId(Long doctorId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(doctorId) && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
         }
 
@@ -100,43 +84,30 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .toList();
     }
 
-    /**
-     * ID ile randevu bilgisini döner.
-     */
     @Override
     public Optional<Appointments> getAppointmentById(Long id) {
         return appointmentRepository.findById(id);
     }
 
-    /**
-     * Verilen tarih ve saatte doktorun uygun olup olmadığını kontrol eder.
-     */
     @Override
     public boolean isDoctorAvailable(Long doctorId, LocalDate date, LocalTime time) {
         User doctor = userRepository.findById(doctorId).orElseThrow();
         return appointmentRepository.findByDoctorAndDateAndTime(doctor, date, time).isEmpty();
     }
 
-    /**
-     * Belirli bir randevuyu ID ile siler.
-     * (İsteğe göre sadece admin veya kendi randevusunu silen kullanıcı kontrolü eklenebilir)
-     */
     @Override
     public void deteAppointment(Long id) {
         appointmentRepository.deleteById(id);
     }
 
-    /**
-     * Sistemdeki tüm randevuları döner.
-     * Sadece ADMIN erişebilir.
-     */
     @Override
     public List<Appointments> getAllAppointments() {
-        if (!SecurityUtil.hasRole("ADMIN")) {
+        if (SecurityUtil.getCurrentUser(userRepository).getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece admin tüm randevuları görüntüleyebilir.");
         }
         return appointmentRepository.findAll();
     }
+
     @Override
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentRepository.findById(id)
@@ -152,12 +123,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
-
-        if (!SecurityUtil.hasRole("HASTA") && !SecurityUtil.hasRole("ADMIN")) {
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+        if (currentUser.getRole() != User.Role.HASTA && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece hasta ve adminler görüntüleyebilir.");
         }
         return appointmentRepository.findByDoctorIdAndDate(doctorId, date);
     }
+
     private void updateExpiredAppointments(List<Appointments> appointments) {
         LocalDate today = LocalDate.now();
 

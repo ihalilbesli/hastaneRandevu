@@ -30,18 +30,17 @@ public class ComplaintServiceImpl implements ComplaintService {
     public Complaint createComplaint(Complaint complaint) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-
-        Long userId = complaint.getUser().getId();
-        User targetUser = userRepository.findById(userId).orElseThrow();
-
-        // Güvenlik: Sadece kendi adına şikayet yapılabilir
-        if (currentUser.getId()!=(targetUser.getId())) {
+        // Kendi adına mı şikayet yapıyor?
+        if (currentUser.getId()!=(complaint.getUser().getId())) {
             throw new RuntimeException("Sadece kendi adınıza şikayet oluşturabilirsiniz.");
         }
 
-        complaint.setUser(targetUser);
+        // Doğrudan currentUser set et
+        complaint.setUser(currentUser);
+
         return complaintRepository.save(complaint);
     }
+
 
     /**
      * Kullanıcı ID’sine göre şikayetleri getirir.

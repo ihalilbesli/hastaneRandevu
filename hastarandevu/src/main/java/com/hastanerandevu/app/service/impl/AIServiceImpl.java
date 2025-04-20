@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.service.impl;
 
+import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.AIService;
 import com.hastanerandevu.app.util.SecurityUtil;
@@ -34,9 +35,9 @@ public class AIServiceImpl implements AIService {
      */
     @Override
     public String analyzeComplaint(String complaintText) {
-        String email = SecurityUtil.getCurrentUserId();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!SecurityUtil.hasRole("HASTA")) {
+        if (currentUser.getRole() != User.Role.HASTA) {
             throw new RuntimeException("Yapay zeka sadece HASTA kullanıcılar tarafından kullanılabilir.");
         }
 
@@ -73,4 +74,5 @@ public class AIServiceImpl implements AIService {
             return "Yapay zeka şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.";
         }
     }
+
 }

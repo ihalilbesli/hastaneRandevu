@@ -28,26 +28,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    //Kullanici kayit islemi
     @Override
     public User register(User user) {
-        //  1. Şu an kim giriş yapmış, onu alıyoruz (anonymous olabilir)
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        //  2. Eğer giriş yapılmamışsa veya anonymous kullanıcıysa (yani normal kullanıcı kayıt oluyor)
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            // ️ Bu durumda sistem otomatik olarak rolü HASTA yapar
-            user.setRole(User.Role.HASTA);
-        } else {
-            // 👮 3. Giriş yapılmışsa ve kayıt olunuyorsa → sadece ADMIN kayıt yapabilir
-            if (!SecurityUtil.hasRole("ADMIN")) {
+            // Eğer giriş yapılmışsa ve kullanıcı ADMIN değilse hata fırlat
+            if (currentUser.getRole() != User.Role.ADMIN) {
                 throw new RuntimeException("Sadece admin başka rol ile kullanıcı oluşturabilir.");
             }
+        } catch (Exception e) {
+            // Giriş yapılmamışsa (anonymous user), rolü otomatik olarak HASTA yap
+            user.setRole(User.Role.HASTA);
         }
 
-
         user.setPassword(encodePassword(user.getPassword()));
-
         return userRepository.save(user);
     }
 
