@@ -67,8 +67,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Optional<User> getUserById(Long id) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (currentUser.getId()!=(id) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi bilgilerinizi görüntüleyebilirsiniz.");
@@ -82,11 +81,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Optional<User> findByPhoneNumber(String phoneNumber) {
-        String email = SecurityUtil.getCurrentUserId();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
         Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
+
         if (user.isEmpty()) return user;
 
-        if (!user.get().getEmail().equals(email) && !SecurityUtil.hasRole("ADMIN")) {
+        if (!user.get().getEmail().equals(currentUser.getEmail()) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Bu bilgiye erişim izniniz yok.");
         }
         return user;

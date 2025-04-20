@@ -27,15 +27,19 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      * Yeni reçete oluşturur.
      * Sadece DOKTOR rolündeki kullanıcılar kendi adına reçete yazabilir.
      */
+
     @Override
     public Prescription createPrescription(Prescription prescription) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentDoctor = userRepository.findByEmail(email).orElseThrow();
+        // Login olan kullanıcıyı getir
+        User currentDoctor = SecurityUtil.getCurrentUser(userRepository);
+        System.out.println("Login olan kullanıcı rolü: " + currentDoctor.getRole().name());
 
-        if (!SecurityUtil.hasRole("DOCTOR")) {
+        // Rol kontrolü yap
+        if (!currentDoctor.getRole().name().equals("DOKTOR")) {
             throw new RuntimeException("Reçete sadece doktor tarafından oluşturulabilir.");
         }
 
+        // Hasta kontrolü
         User patient = userRepository.findById(prescription.getPatient().getId())
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
@@ -43,10 +47,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         prescription.setPatient(patient);
         prescription.setDate(LocalDate.now());
 
-        // 10 haneli benzersiz prescription code oluştur
+        // Reçete kodu oluştur
         String randomPart = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8).toUpperCase();
-        String generatedCode = "RX" + randomPart;
-        prescription.setPrescriptionCode(generatedCode);
+        prescription.setPrescriptionCode("RX" + randomPart);
 
         return prescriptionRepository.save(prescription);
     }
@@ -72,8 +75,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reçete bulunamadı."));
 
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (prescription.getDoctor().getId()!=(currentUser.getId()) &&
                 prescription.getPatient().getId()!=(currentUser.getId()) &&
@@ -90,8 +92,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi reçetelerinizi görebilirsiniz.");
@@ -109,8 +110,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi yazdığınız reçeteleri görebilirsiniz.");
@@ -127,8 +127,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByPatientIdAndPeriod(Long patientId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
 
         if (currentUser.getId() != patientId && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi reçetelerinizi görüntüleyebilirsiniz.");
@@ -146,8 +146,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
      */
     @Override
     public List<Prescription> getPrescriptionsByDoctorIdAndPeriod(Long doctorId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
 
         if (currentUser.getId() != doctorId && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi yazdığınız reçeteleri görüntüleyebilirsiniz.");

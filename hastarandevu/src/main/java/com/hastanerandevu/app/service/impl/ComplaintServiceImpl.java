@@ -28,8 +28,8 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public Complaint createComplaint(Complaint complaint) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
 
         Long userId = complaint.getUser().getId();
         User targetUser = userRepository.findById(userId).orElseThrow();
@@ -49,8 +49,8 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public List<Complaint> getComplaintByUserId(Long id) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
 
         if (currentUser.getId()!=(id) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi şikayetlerinizi görüntüleyebilirsiniz.");
@@ -66,8 +66,8 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public List<Complaint> getComplaintByUserIdAndDate(Long userId, String period) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
 
         if (currentUser.getId()!=(userId) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi şikayet geçmişinizi görüntüleyebilirsiniz.");

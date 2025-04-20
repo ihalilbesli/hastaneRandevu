@@ -31,8 +31,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public Appointments createAppointment(Appointments appointments) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (!SecurityUtil.hasRole("HASTA")) {
             throw new RuntimeException("Sadece hastalar randevu oluşturabilir.");
@@ -71,8 +70,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public List<Appointments> getAppointemnrsByPatientId(Long patientId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (currentUser.getId()!=(patientId) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
@@ -91,8 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public List<Appointments> getAppointmensByDoctorId(Long doctorId) {
-        String email = SecurityUtil.getCurrentUserId();
-        User currentUser = userRepository.findByEmail(email).orElseThrow();
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
         if (currentUser.getId()!=(doctorId) && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
