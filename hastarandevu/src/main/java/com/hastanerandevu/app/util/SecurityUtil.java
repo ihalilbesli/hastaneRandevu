@@ -16,7 +16,8 @@ public class SecurityUtil {
     public static boolean hasRole(String roleName) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_" + roleName));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority()
+                        .equalsIgnoreCase("ROLE_" + roleName));
     }
     public static User getCurrentUser(UserRepository userRepository) {
         String email = getCurrentUserId();

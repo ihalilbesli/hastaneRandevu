@@ -107,7 +107,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
 
     @Override
     public PatientReports updateReport(Long id, PatientReports updatedReport) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin rapor güncelleyebilir.");
         }
 
@@ -122,7 +122,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
 
     @Override
     public void deleteReport(Long id) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin rapor silebilir.");
         }
         reportRepository.deleteById(id);

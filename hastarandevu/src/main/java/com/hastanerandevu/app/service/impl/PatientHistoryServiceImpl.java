@@ -29,13 +29,12 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
     public PatientHistory createHistory(PatientHistory history) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!SecurityUtil.hasRole("DOCTOR")) {
+        if (!SecurityUtil.hasRole("DOKTOR")) {
             throw new RuntimeException("Sadece doktorlar geçmiş bilgisi ekleyebilir.");
         }
 
         User patient = userRepository.findById(history.getPatient().getId())
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
-
         history.setDoctor(currentUser);
         history.setPatient(patient);
         history.setDate(LocalDate.now());
@@ -49,7 +48,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public PatientHistory updateHistory(Long id, PatientHistory updatedHistory) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin geçmiş bilgisi güncelleyebilir.");
         }
 
@@ -69,7 +68,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
      */
     @Override
     public void deleteHistory(Long id) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin geçmiş bilgisi silebilir.");
         }
 
@@ -106,7 +105,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
     public List<PatientHistory> getHistoriesByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görebilirsiniz.");
         }
 
@@ -143,7 +142,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
     public List<PatientHistory> getHistoriesByPatientIdAndPeriod(Long patientId, String period) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görüntüleyebilirsiniz.");
         }
 

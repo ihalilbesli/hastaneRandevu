@@ -134,7 +134,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Override
     public Prescription updatePrescription(Long id, Prescription updatedPrescription) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin reçete güncelleyebilir.");
         }
 
@@ -147,7 +147,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Override
     public void deletePrescription(Long id) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin reçete silebilir.");
         }
 

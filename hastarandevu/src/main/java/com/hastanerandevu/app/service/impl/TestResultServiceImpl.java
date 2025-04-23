@@ -76,7 +76,7 @@ public class TestResultServiceImpl implements TestResultService {
 
     @Override
     public TestResult updateTestResult(Long id, TestResult updatedResult) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin test sonucu güncelleyebilir.");
         }
 
@@ -94,7 +94,7 @@ public class TestResultServiceImpl implements TestResultService {
 
     @Override
     public void deleteTestResult(Long id) {
-        if (!SecurityUtil.hasRole("DOCTOR") && !SecurityUtil.hasRole("ADMIN")) {
+        if (!SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece doktor veya admin test sonucu silebilir.");
         }
 

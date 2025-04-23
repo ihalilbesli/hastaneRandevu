@@ -101,7 +101,7 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public List<Complaint> getComplaintByStatus(Complaint.Status status) {
-        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOCTOR")) {
+        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOKTOR")) {
             throw new RuntimeException("Bu işlemi yalnızca yetkili kişiler görüntüleyebilir.");
         }
         return complaintRepository.findByStatus(status);
@@ -112,7 +112,7 @@ public class ComplaintServiceImpl implements ComplaintService {
      */
     @Override
     public Complaint updateComplaint(Long id, Complaint updatedComplaint) {
-        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOCTOR")) {
+        if (!SecurityUtil.hasRole("ADMIN") && !SecurityUtil.hasRole("DOKTOR")) {
             throw new RuntimeException("Sadece admin veya doktorlar şikayet güncelleyebilir.");
         }
 
