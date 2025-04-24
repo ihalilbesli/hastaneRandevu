@@ -121,6 +121,7 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         complaint.setContent(updatedComplaint.getContent());
         complaint.setStatus(updatedComplaint.getStatus());
+        complaint.setAdminNote(updatedComplaint.getAdminNote());
 
         return complaintRepository.save(complaint);
     }

@@ -25,8 +25,14 @@ public class Complaint {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;         //sikayetler
 
+    @Column(nullable = false)
+    private String subject; // Şikayet konusu
+
     @Enumerated(EnumType.STRING)
     private Status status=Status.BEKLEMEDE;
+
+    @Column(columnDefinition = "TEXT")
+    private String adminNote; // Admin veya doktorun bıraktığı çözüm notu
 
     @Column(nullable = false,updatable = false)
     private LocalDate createdAt=LocalDate.now();
