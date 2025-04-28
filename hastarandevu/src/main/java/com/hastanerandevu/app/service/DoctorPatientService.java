@@ -8,4 +8,6 @@ public interface DoctorPatientService {
     List<User> getMyPatients();
     List<User> searchMyPatientsByName(String name);
     List<User> searchMyPatientsByEmail(String emailPart);
+    List<User> getMyPatientsToday();
+
 }

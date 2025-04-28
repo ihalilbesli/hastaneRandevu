@@ -1,11 +1,13 @@
 package com.hastanerandevu.app.service.impl;
 
+import com.hastanerandevu.app.model.Appointments;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.*;
 import com.hastanerandevu.app.service.DoctorPatientService;
 import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,17 +18,19 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
     private final PatientHistoryRepository patientHistoryRepository;
     private final PatientReportRepository patientReportRepository;
     private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
 
     public DoctorPatientServiceImpl(PrescriptionRepository prescriptionRepository,
                                     TestResultRepository testResultRepository,
                                     PatientHistoryRepository patientHistoryRepository,
                                     PatientReportRepository patientReportRepository,
-                                    UserRepository userRepository) {
+                                    UserRepository userRepository, AppointmentRepository appointmentRepository) {
         this.prescriptionRepository = prescriptionRepository;
         this.testResultRepository = testResultRepository;
         this.patientHistoryRepository = patientHistoryRepository;
         this.patientReportRepository = patientReportRepository;
         this.userRepository = userRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     /**
@@ -69,5 +73,26 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
         return getMyPatients().stream()
                 .filter(user -> user.getEmail().toLowerCase().contains(emailPart.toLowerCase()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getMyPatientsToday() {
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
+        // 🔥 Güvenlik kontrolü
+        if (currentUser.getRole() != User.Role.DOKTOR && currentUser.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("Sadece doktorlar veya adminler bugünkü hastaları görüntüleyebilir.");
+        }
+
+        LocalDate today = LocalDate.now();
+
+        List<Appointments> appointmentsToday = appointmentRepository.findByDoctorIdAndDate(currentUser.getId(), today);
+
+        List<User> patientsToday = appointmentsToday.stream()
+                .map(Appointments::getPatient)
+                .distinct()
+                .toList();
+
+        return patientsToday;
     }
 }

@@ -74,10 +74,11 @@ public class AIServiceImpl implements AIService {
         messages.add(Map.of(
                 "role", "user",
                 "content", "Bir hastanın şikayeti: \"" + complaintText +
-                        "\". Aşağıda verilen klinik listesine göre bu şikayete en uygun olanı öner. " +
+                        "\". Aşağıda verilen klinik listesine göre bu şikayete en uygun olanı öner." +
+                        "Sadece CLinic Dosyasindaki Cliniclere Yonlendir,Baska Bir sey yazma " +
                         "Ayrıca hastaya geleneksel tıbbi bir tavsiye ver. " +
                         "Klinikler:\\n" + CLINICS +
-                        "\\nCevap formatı: Poliklinik: ...\\nTavsiye: ... şeklinde olsun."
+                        "\\nCevap formatı: Poliklinik: ...\\nTavsiye: ... şeklinde olsun(Bu formatta Polikinlik: kismini yukarida verilern  clinicler sadece olucak baslka olmasin)."
         ));
 
         requestBody.put("messages", messages);

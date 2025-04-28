@@ -36,4 +36,9 @@ public class DoctorPatientController {
     public ResponseEntity<List<User>> searchMyPatientsByEmail(@RequestParam String email) {
         return ResponseEntity.ok(doctorPatientService.searchMyPatientsByEmail(email));
     }
+    @GetMapping("/my-patients-today")
+    public ResponseEntity<List<User>> getMyPatientsToday() {
+        return ResponseEntity.ok(doctorPatientService.getMyPatientsToday());
+    }
+
 }

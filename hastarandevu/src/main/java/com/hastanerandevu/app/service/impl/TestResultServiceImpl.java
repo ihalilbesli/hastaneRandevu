@@ -2,6 +2,7 @@ package com.hastanerandevu.app.service.impl;
 
 import com.hastanerandevu.app.model.TestResult;
 import com.hastanerandevu.app.model.User;
+import com.hastanerandevu.app.repository.AppointmentRepository;
 import com.hastanerandevu.app.repository.TestResultRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.TestResultService;
@@ -17,10 +18,12 @@ public class TestResultServiceImpl implements TestResultService {
 
     private final TestResultRepository testResultRepository;
     private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
 
-    public TestResultServiceImpl(TestResultRepository testResultRepository, UserRepository userRepository) {
+    public TestResultServiceImpl(TestResultRepository testResultRepository, UserRepository userRepository, AppointmentRepository appointmentRepository) {
         this.testResultRepository = testResultRepository;
         this.userRepository = userRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Override
@@ -44,14 +47,29 @@ public class TestResultServiceImpl implements TestResultService {
     public List<TestResult> getTestResultsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
+        if (currentUser.getRole() == User.Role.HASTA) {
+            // Hasta ise: sadece kendi verisine erişebilir
+            if (!Objects.equals(currentUser.getId(), patientId)) {
+                throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
+            }
+        } else if (currentUser.getRole() == User.Role.DOKTOR) {
+            // Doktor ise: sadece kendi hastalarına erişebilir
+            boolean hasRelation = appointmentRepository.existsByDoctorIdAndPatientId(currentUser.getId(), patientId);
+            if (!hasRelation) {
+                throw new RuntimeException("Bu hastaya ait verilere erişim yetkiniz yok.");
+            }
+        } else if (currentUser.getRole() != User.Role.ADMIN) {
+            // Ne hasta, ne doktor, ne admin ➔ Hata!
+            throw new RuntimeException("Bu işlemi yapmaya yetkiniz yok.");
         }
 
+        // Hasta varsa test sonuçlarını getir
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
+
         return testResultRepository.findByPatient(patient);
     }
+
 
     @Override
     public List<TestResult> getTestResultsByDoctorId(Long doctorId) {
