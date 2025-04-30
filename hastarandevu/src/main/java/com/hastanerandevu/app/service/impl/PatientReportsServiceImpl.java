@@ -52,12 +52,14 @@ public class PatientReportsServiceImpl implements PatientReportsService {
     public List<PatientReports> getReportsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(patientId) && currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId()!=(patientId)) {
             throw new RuntimeException("Sadece kendi raporlarınızı görüntüleyebilirsiniz.");
         }
 
+        // Admin ve Doktor raporları görebilir (hasta zaten filtrelenmiş)
         return reportRepository.findByPatientId(patientId);
     }
+
 
     @Override
     public List<PatientReports> getReportsByDoctorId(Long doctorId) {
