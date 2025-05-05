@@ -122,6 +122,27 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Appointments updateStatus(Long appointmentId, Appointments.Status newStatus, String note) {
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
+        Appointments appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Randevu bulunamadı"));
+
+        boolean isDoctor = currentUser.getRole() == User.Role.DOKTOR &&
+                currentUser.getId()==(appointment.getDoctor().getId());
+        boolean isAdmin = currentUser.getRole() == User.Role.ADMIN;
+
+        if (!isDoctor && !isAdmin) {
+            throw new RuntimeException("Sadece ilgili doktor veya admin durumu güncelleyebilir.");
+        }
+
+        appointment.setStatus(newStatus);
+
+        return appointmentRepository.save(appointment);
+    }
+
+
+    @Override
     public List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
         if (currentUser.getRole() != User.Role.HASTA && currentUser.getRole() != User.Role.ADMIN) {

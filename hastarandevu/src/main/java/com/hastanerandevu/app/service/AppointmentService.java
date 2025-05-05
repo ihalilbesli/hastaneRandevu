@@ -32,4 +32,6 @@ public interface AppointmentService {
     List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date);
 
     void cancelAppointment(Long id);
+
+    Appointments updateStatus(Long appointmentId, Appointments.Status newStatus, String note);
 }

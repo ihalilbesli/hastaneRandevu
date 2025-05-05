@@ -45,7 +45,11 @@ public class Appointments {
     private Status status= Status.valueOf("AKTIF");
 
     public enum Status{
-    AKTIF,IPTAL_EDILDI
-    }
+        AKTIF,
+        IPTAL_EDILDI,
+        COMPLETED,      // Muayene tamamlandı
+        GEC_KALINDI,
+
+        }
     
 }

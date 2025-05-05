@@ -100,6 +100,16 @@ public class AppointmentController {
                     .body(Map.of("message", "Randevu zaten iptal edilmiş."));
         }
     }
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Appointments> updateAppointmentStatus(
+            @PathVariable Long id,
+            @RequestParam("status") Appointments.Status status,
+            @RequestParam(value = "note", required = false) String note) {
+
+        Appointments updated = appointmentService.updateStatus(id, status, note);
+        return ResponseEntity.ok(updated);
+    }
+
 
 
 }

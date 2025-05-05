@@ -56,7 +56,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
             throw new RuntimeException("Sadece kendi raporlarınızı görüntüleyebilirsiniz.");
         }
 
-        // Admin ve Doktor raporları görebilir (hasta zaten filtrelenmiş)
+        // Admin ve Doktor raporları görebilir
         return reportRepository.findByPatientId(patientId);
     }
 
