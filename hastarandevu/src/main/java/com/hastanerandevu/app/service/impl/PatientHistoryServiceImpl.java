@@ -105,8 +105,18 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
     public List<PatientHistory> getHistoriesByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId() != patientId && !SecurityUtil.hasRole("DOKTOR") && !SecurityUtil.hasRole("ADMIN")) {
-            throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görebilirsiniz.");
+        // Hasta, doktor veya admin harici kullanıcılar erişemez
+        if (
+                currentUser.getRole() != User.Role.HASTA &&
+                        currentUser.getRole() != User.Role.DOKTOR &&
+                        currentUser.getRole() != User.Role.ADMIN
+        ) {
+            throw new RuntimeException("Bu geçmiş bilgilerine erişim yetkiniz yok.");
+        }
+
+        // Hasta ise sadece kendi verisine erişebilir
+        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId()!=(patientId)) {
+            throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görüntüleyebilirsiniz.");
         }
 
         User patient = userRepository.findById(patientId)
@@ -114,6 +124,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
 
         return patientHistoryRepository.findByPatient(patient);
     }
+
 
     /**
      * Doktorun eklediği geçmiş bilgilerini getirir.

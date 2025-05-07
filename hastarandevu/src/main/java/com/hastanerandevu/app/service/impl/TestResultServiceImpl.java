@@ -47,28 +47,28 @@ public class TestResultServiceImpl implements TestResultService {
     public List<TestResult> getTestResultsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getRole() == User.Role.HASTA) {
-            // Hasta ise: sadece kendi verisine erişebilir
-            if (!Objects.equals(currentUser.getId(), patientId)) {
-                throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
-            }
-        } else if (currentUser.getRole() == User.Role.DOKTOR) {
-            // Doktor ise: sadece kendi hastalarına erişebilir
-            boolean hasRelation = appointmentRepository.existsByDoctorIdAndPatientId(currentUser.getId(), patientId);
-            if (!hasRelation) {
-                throw new RuntimeException("Bu hastaya ait verilere erişim yetkiniz yok.");
-            }
-        } else if (currentUser.getRole() != User.Role.ADMIN) {
-            // Ne hasta, ne doktor, ne admin ➔ Hata!
-            throw new RuntimeException("Bu işlemi yapmaya yetkiniz yok.");
+        // Sadece hasta, doktor veya admin görebilmeli
+        if (
+                currentUser.getRole() != User.Role.HASTA &&
+                        currentUser.getRole() != User.Role.DOKTOR &&
+                        currentUser.getRole() != User.Role.ADMIN
+        ) {
+            throw new RuntimeException("Bu hastanın test sonuçlarına erişim yetkiniz yok.");
         }
 
-        // Hasta varsa test sonuçlarını getir
+        // Hasta ise sadece kendi sonuçlarını görebilir
+        if (currentUser.getRole() == User.Role.HASTA && !Objects.equals(currentUser.getId(), patientId)) {
+            throw new RuntimeException("Sadece kendi test sonuçlarınızı görüntüleyebilirsiniz.");
+        }
+
+        // Doktor ise hangi doktor yaptığı fark etmeksizin görebilecek
+
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Hasta bulunamadı."));
 
         return testResultRepository.findByPatient(patient);
     }
+
 
 
     @Override

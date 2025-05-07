@@ -73,8 +73,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public List<Prescription> getPrescriptionsByPatientId(Long patientId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (!Objects.equals(currentUser.getId(), patientId) && currentUser.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Sadece kendi reçetelerinizi görebilirsiniz.");
+        if (
+                currentUser.getRole() != User.Role.DOKTOR &&
+                        currentUser.getRole() != User.Role.ADMIN &&
+                        !Objects.equals(currentUser.getId(), patientId)
+        ) {
+            throw new RuntimeException("Bu hastanın reçetelerine erişim yetkiniz yok.");
         }
 
         User patient = userRepository.findById(patientId)
@@ -82,6 +86,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         return prescriptionRepository.findByPatient(patient);
     }
+
 
     @Override
     public List<Prescription> getPrescriptionsByDoctorId(Long doctorId) {

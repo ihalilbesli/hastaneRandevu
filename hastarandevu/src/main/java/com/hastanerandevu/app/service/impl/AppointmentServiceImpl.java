@@ -70,19 +70,23 @@ public class AppointmentServiceImpl implements AppointmentService {
         updateExpiredAppointments(appointments);
         return appointments;
     }
-
     @Override
     public List<Appointments> getAppointmensByDoctorId(Long doctorId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser.getId() != doctorId && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi randevularınızı görüntüleyebilirsiniz.");
         }
 
-        return appointmentRepository.findAll().stream()
-                .filter(a -> a.getDoctor().getId()==(doctorId))
+        List<Appointments> appointments = appointmentRepository.findAll().stream()
+                .filter(a -> a.getDoctor().getId() == doctorId)
                 .toList();
+
+        updateExpiredAppointments(appointments);
+
+        return appointments;
     }
+
 
     @Override
     public Optional<Appointments> getAppointmentById(Long id) {
@@ -153,12 +157,28 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private void updateExpiredAppointments(List<Appointments> appointments) {
         LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
 
         for (Appointments a : appointments) {
+            // Geçmiş tarihli AKTIF randevular
             if (a.getDate().isBefore(today) && a.getStatus() == Appointments.Status.AKTIF) {
                 a.setStatus(Appointments.Status.IPTAL_EDILDI);
                 appointmentRepository.save(a);
             }
+
+            // 3 saat geçmiş GEC_KALINDI randevular
+            if (a.getStatus() == Appointments.Status.GEC_KALINDI) {
+                LocalDate appointmentDate = a.getDate();
+                LocalTime appointmentTime = a.getTime();
+
+                if (appointmentDate.isBefore(today) ||
+                        (appointmentDate.equals(today) && appointmentTime.plusHours(3).isBefore(now))) {
+                    a.setStatus(Appointments.Status.IPTAL_EDILDI);
+                    a.setDescription("3 saat içinde gelinmediği için iptal edildi.");
+                    appointmentRepository.save(a);
+                }
+            }
         }
     }
+
 }
