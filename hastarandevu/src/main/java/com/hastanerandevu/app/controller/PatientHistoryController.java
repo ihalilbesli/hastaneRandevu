@@ -27,7 +27,7 @@ public class PatientHistoryController {
         return ResponseEntity.ok(patientHistoryService.getHistoriesByPatientId(patientId));
     }
 
-    // Belirli doktorun ekledigi kayitlari getir (opsiyonel)
+    // Belirli doktorun ekledigi kayitlari getir
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<PatientHistory>> getByDoctor(@PathVariable Long doctorId) {
         return ResponseEntity.ok(patientHistoryService.getHistoriesByDoctorId(doctorId));

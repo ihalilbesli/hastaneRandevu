@@ -104,4 +104,35 @@ public class UserServiceImpl implements UserService {
     public List<User> findBySpecializationContainingIgnoreCase(String specialization) {
         return userRepository.findBySpecializationContainingIgnoreCase(specialization);
     }
+    @Override
+    public void deleteUserById(Long id) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin kullanıcı silebilir.");
+        }
+        userRepository.deleteById(id);
+    }
+    @Override
+    public User updateUser(Long id, User updatedUser) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin kullanıcı güncelleyebilir.");
+        }
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
+
+        user.setName(updatedUser.getName());
+        user.setSurname(updatedUser.getSurname());
+        user.setEmail(updatedUser.getEmail());
+        user.setPhoneNumber(updatedUser.getPhoneNumber());
+        user.setGender(updatedUser.getGender());
+        user.setBirthDate(updatedUser.getBirthDate());
+        user.setBloodType(updatedUser.getBloodType());
+        user.setRole(updatedUser.getRole());
+        user.setChronicDiseases(updatedUser.getChronicDiseases());
+        user.setSpecialization(updatedUser.getSpecialization());
+
+        return userRepository.save(user);
+    }
+
+
 }

@@ -36,4 +36,8 @@ public interface UserService {
 
     // Uzmanlık alanına göre doktorları listeleme
     List<User> findBySpecializationContainingIgnoreCase(String specialization);
+
+    void deleteUserById(Long id);
+    User updateUser(Long id, User updatedUser);
+
 }

@@ -105,6 +105,17 @@ public class UserController {
             return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
         }
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
+    }
+
+
 
 
 }
