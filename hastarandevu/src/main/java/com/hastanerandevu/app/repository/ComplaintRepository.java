@@ -26,7 +26,11 @@ public interface ComplaintRepository extends JpaRepository<Complaint,Long> {
     List<Complaint> findByUserAndCreatedAtAfter(User user, LocalDate date); //(Hasta icin)
 
     List<Complaint> findByCreatedAtAfter(LocalDate date); //(Admin icin)
+    
+    List<Complaint> findByUser_NameContainingIgnoreCase(String name);
 
-    // Kullanıcı rollerine göre şikayetleri listele (Hasta, Doktor, Admin)
-    List<Complaint> findByUser_Role(User.Role role);
+
+
+
+
 }

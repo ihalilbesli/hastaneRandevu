@@ -38,6 +38,6 @@ public class Complaint {
     private LocalDate createdAt=LocalDate.now();
 
     public enum Status {
-        BEKLEMEDE, COZULDU
+        BEKLEMEDE,INCELEMEDE, COZULDU
     }
 }

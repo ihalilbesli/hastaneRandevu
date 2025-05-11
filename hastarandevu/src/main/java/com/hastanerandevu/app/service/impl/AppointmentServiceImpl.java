@@ -145,6 +145,31 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    @Override
+    public List<Appointments> getAllAppointmentsByPeriod(String period) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin zaman filtreli randevuları görüntüleyebilir.");
+        }
+        LocalDate startDate = calculateStartDate(period);
+        return appointmentRepository.findByDateAfter(startDate);
+    }
+
+    @Override
+    public List<Appointments> searchAppointmentsByKeyword(String keyword) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin açıklamaya göre arama yapabilir.");
+        }
+        return appointmentRepository.findByDescriptionContainingIgnoreCase(keyword);
+    }
+
+    @Override
+    public long countAppointmentsByStatus(Appointments.Status status) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin randevu sayısını görebilir.");
+        }
+        return appointmentRepository.countByStatus(status);
+    }
+
 
     @Override
     public List<Appointments> getAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
@@ -179,6 +204,15 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
             }
         }
+    }
+    private LocalDate calculateStartDate(String period) {
+        return switch (period.toLowerCase()) {
+            case "day" -> LocalDate.now().minusDays(1);
+            case "week" -> LocalDate.now().minusWeeks(1);
+            case "month" -> LocalDate.now().minusMonths(1);
+            case "year" -> LocalDate.now().minusYears(1);
+            default -> throw new IllegalArgumentException("Geçersiz zaman aralığı: " + period);
+        };
     }
 
 }

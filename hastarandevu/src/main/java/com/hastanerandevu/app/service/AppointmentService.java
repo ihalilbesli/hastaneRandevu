@@ -34,4 +34,13 @@ public interface AppointmentService {
     void cancelAppointment(Long id);
 
     Appointments updateStatus(Long appointmentId, Appointments.Status newStatus, String note);
+
+    // Belirli zaman aralığına göre tüm randevuları getir
+    List<Appointments> getAllAppointmentsByPeriod(String period);
+
+    // Açıklama içinde arama (admin kullanımı)
+    List<Appointments> searchAppointmentsByKeyword(String keyword);
+
+    // Belirli bir duruma göre toplam randevu sayısını döner (istatistik amaçlı)
+    long countAppointmentsByStatus(Appointments.Status status);
 }

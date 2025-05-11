@@ -109,7 +109,22 @@ public class AppointmentController {
         Appointments updated = appointmentService.updateStatus(id, status, note);
         return ResponseEntity.ok(updated);
     }
+    //  Zaman aralığına göre tüm randevular (sadece admin)
+    @GetMapping("/filter")
+    public ResponseEntity<List<Appointments>> getAllAppointmentsByPeriod(@RequestParam String period) {
+        return ResponseEntity.ok(appointmentService.getAllAppointmentsByPeriod(period));
+    }
 
+    //  Açıklamada anahtar kelime ile arama (sadece admin)
+    @GetMapping("/search")
+    public ResponseEntity<List<Appointments>> searchAppointmentsByKeyword(@RequestParam String keyword) {
+        return ResponseEntity.ok(appointmentService.searchAppointmentsByKeyword(keyword));
+    }
 
+    //  Belirli durumdaki randevu sayısını getir (istatistik için)
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAppointmentsByStatus(@RequestParam Appointments.Status status) {
+        return ResponseEntity.ok(appointmentService.countAppointmentsByStatus(status));
+    }
 
 }
