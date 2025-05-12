@@ -42,6 +42,11 @@ public class AuthServiceImpl implements AuthService {
             user.setRole(User.Role.HASTA);
         }
 
+        // Klinik kontrolü: sadece doktorlar için zorunlu
+        if (user.getRole() == User.Role.DOKTOR && user.getClinic() == null) {
+            throw new RuntimeException("Doktor oluşturulurken klinik seçilmelidir.");
+        }
+
         user.setPassword(encodePassword(user.getPassword()));
         return userRepository.save(user);
     }

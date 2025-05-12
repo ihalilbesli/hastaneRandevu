@@ -36,9 +36,9 @@ public class Appointments {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String clinic;
-
+    @ManyToOne
+    @JoinColumn(name = "clinic_id", nullable = false)
+    private Clinic clinic;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

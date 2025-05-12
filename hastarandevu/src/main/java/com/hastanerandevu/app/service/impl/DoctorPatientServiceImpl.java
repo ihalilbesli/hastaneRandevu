@@ -47,10 +47,16 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
 
         Set<User> uniquePatients = new HashSet<>();
 
+        // Hastalar, doktorun yaptığı işlemlerden gelen verilerle toplanır
         prescriptionRepository.findByDoctor(currentDoctor).forEach(p -> uniquePatients.add(p.getPatient()));
         testResultRepository.findByDoctor(currentDoctor).forEach(t -> uniquePatients.add(t.getPatient()));
         patientHistoryRepository.findByDoctor(currentDoctor).forEach(h -> uniquePatients.add(h.getPatient()));
         patientReportRepository.findByDoctor(currentDoctor).forEach(r -> uniquePatients.add(r.getPatient()));
+
+        // 🔥 Sadece COMPLETED randevular eklensin
+        appointmentRepository.findByDoctor(currentDoctor).stream()
+                .filter(a -> a.getStatus() == Appointments.Status.COMPLETED)
+                .forEach(a -> uniquePatients.add(a.getPatient()));
 
         return new ArrayList<>(uniquePatients);
     }

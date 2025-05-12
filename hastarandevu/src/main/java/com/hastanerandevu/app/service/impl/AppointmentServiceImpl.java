@@ -33,28 +33,37 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Sadece hastalar randevu oluşturabilir.");
         }
 
-        User patient = userRepository.findById(appointments.getPatient().getId()).orElseThrow();
-        User doctor = userRepository.findById(appointments.getDoctor().getId()).orElseThrow();
+        User patient = userRepository.findById(appointments.getPatient().getId())
+                .orElseThrow(() -> new RuntimeException("Hasta bulunamadı"));
+        User doctor = userRepository.findById(appointments.getDoctor().getId())
+                .orElseThrow(() -> new RuntimeException("Doktor bulunamadı"));
 
         if (patient.getId()!=(currentUser.getId())) {
             throw new RuntimeException("Sadece kendi adınıza randevu oluşturabilirsiniz.");
         }
 
+        // 🔍 Doktorun klinik bilgisi kontrol ediliyor
+        if (doctor.getClinic() == null) {
+            throw new RuntimeException("Doktorun bağlı olduğu bir klinik bulunamadı.");
+        }
+
+        // ✅ Mevcut randevu kontrolü: aynı hasta aynı klinikten aktif randevusu varsa iptal edilir
         Optional<Appointments> existing = appointmentRepository
-                .findByPatientIdAndClinicAndStatus(patient.getId(), doctor.getSpecialization(), Appointments.Status.AKTIF);
+                .findByPatientIdAndClinicAndStatus(patient.getId(), doctor.getClinic(), Appointments.Status.AKTIF);
 
         existing.ifPresent(a -> {
             a.setStatus(Appointments.Status.IPTAL_EDILDI);
             appointmentRepository.save(a);
         });
 
-        appointments.setClinic(doctor.getSpecialization());
+        appointments.setClinic(doctor.getClinic()); // 👈 artık Clinic entity olarak atanıyor
         appointments.setPatient(patient);
         appointments.setDoctor(doctor);
         appointments.setStatus(Appointments.Status.AKTIF);
 
         return appointmentRepository.save(appointments);
     }
+
 
     @Override
     public List<Appointments> getAppointemnrsByPatientId(Long patientId) {

@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.repository;
 
+import com.hastanerandevu.app.model.Clinic;
 import com.hastanerandevu.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -31,4 +32,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     // Uzmanlık alanına göre doktorları listeleme
     List<User> findBySpecializationContainingIgnoreCase(String specialization);
+
+    List<User> findByClinic(Clinic clinic);
 }

@@ -56,6 +56,10 @@ public class User implements UserDetails {
     @Column
     private String specialization; //uzmanlik (doktor icin)
 
+    @ManyToOne
+    @JoinColumn(name = "clinic_id") //clinic (doktor icin)
+    private Clinic clinic;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(() ->"ROLE_"+ role.name());

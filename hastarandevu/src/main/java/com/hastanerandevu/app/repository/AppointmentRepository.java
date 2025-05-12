@@ -1,6 +1,7 @@
 package com.hastanerandevu.app.repository;
 
 import com.hastanerandevu.app.model.Appointments;
+import com.hastanerandevu.app.model.Clinic;
 import com.hastanerandevu.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -45,7 +46,7 @@ public interface AppointmentRepository extends JpaRepository<Appointments,Long> 
 
     List<Appointments> findByDoctorIdAndDate(Long doctorId, LocalDate date);
 
-    Optional<Appointments> findByPatientIdAndClinicAndStatus(Long patientId, String clinic, Appointments.Status status);
+    Optional<Appointments> findByPatientIdAndClinicAndStatus(Long patientId, Clinic clinic, Appointments.Status status);
 
     boolean existsByDoctorIdAndPatientId(Long doctorId, Long patientId);
 
