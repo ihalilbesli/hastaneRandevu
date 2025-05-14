@@ -130,6 +130,13 @@ public class UserServiceImpl implements UserService {
         user.setRole(updatedUser.getRole());
         user.setChronicDiseases(updatedUser.getChronicDiseases());
         user.setSpecialization(updatedUser.getSpecialization());
+        if (updatedUser.getRole() == User.Role.DOKTOR) {
+
+                user.setClinic(updatedUser.getClinic());
+
+        }
+
+
 
         return userRepository.save(user);
     }
