@@ -63,4 +63,25 @@ public class AnalyticsController {
     public ResponseEntity<List<TimeSlotAppointmentCountDTO>> getAppointmentCountByTimeSlot() {
         return ResponseEntity.ok(analyticsService.getAppointmentCountByTimeSlot());
     }
+    @GetMapping("/users/roles")
+    public ResponseEntity<List<UserRoleCountDTO>> getUserCountByRole() {
+        return ResponseEntity.ok(analyticsService.getUserCountByRole());
+    }
+
+    @GetMapping("/users/genders")
+    public ResponseEntity<List<UserGenderCountDTO>> getUserCountByGender() {
+        return ResponseEntity.ok(analyticsService.getUserCountByGender());
+    }
+
+    @GetMapping("/users/blood-types")
+    public ResponseEntity<List<UserBloodTypeCountDTO>> getUserCountByBloodType() {
+        return ResponseEntity.ok(analyticsService.getUserCountByBloodType());
+    }
+
+
+    @GetMapping("/clinics/doctor-count")
+    public ResponseEntity<List<ClinicDoctorCountDTO>> getDoctorCountByClinic() {
+        return ResponseEntity.ok(analyticsService.getDoctorCountByClinic());
+    }
+
 }

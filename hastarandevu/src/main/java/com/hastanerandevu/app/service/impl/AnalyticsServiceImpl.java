@@ -73,4 +73,27 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         checkAdminAccess();
         return analyticsRepository.getAppointmentCountByTimeSlot();
     }
+    @Override
+    public List<UserRoleCountDTO> getUserCountByRole() {
+        checkAdminAccess();
+        return analyticsRepository.getUserCountByRole();
+    }
+
+    @Override
+    public List<UserGenderCountDTO> getUserCountByGender() {
+        checkAdminAccess();
+        return analyticsRepository.getUserCountByGender();
+    }
+
+    @Override
+    public List<UserBloodTypeCountDTO> getUserCountByBloodType() {
+        checkAdminAccess();
+        return analyticsRepository.getUserCountByBloodType();
+    }
+
+    @Override
+    public List<ClinicDoctorCountDTO> getDoctorCountByClinic() {
+        checkAdminAccess();
+        return analyticsRepository.getDoctorCountByClinic();
+    }
 }

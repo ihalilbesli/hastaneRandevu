@@ -70,4 +70,35 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
                 "FROM Appointments a GROUP BY FUNCTION('DATE_FORMAT', a.time, '%H:%i') ORDER BY FUNCTION('DATE_FORMAT', a.time, '%H:%i')";
         return entityManager.createQuery(jpql, TimeSlotAppointmentCountDTO.class).getResultList();
     }
+    @Override
+    public List<UserRoleCountDTO> getUserCountByRole() {
+        String jpql = "SELECT new com.hastanerandevu.app.dto.UserRoleCountDTO(u.role, COUNT(u)) " +
+                "FROM User u GROUP BY u.role";
+        return entityManager.createQuery(jpql, UserRoleCountDTO.class).getResultList();
+    }
+
+    @Override
+    public List<UserGenderCountDTO> getUserCountByGender() {
+        String jpql = "SELECT new com.hastanerandevu.app.dto.UserGenderCountDTO(u.gender, COUNT(u)) " +
+                "FROM User u GROUP BY u.gender";
+        return entityManager.createQuery(jpql, UserGenderCountDTO.class).getResultList();
+    }
+
+    @Override
+    public List<UserBloodTypeCountDTO> getUserCountByBloodType() {
+        String jpql = "SELECT new com.hastanerandevu.app.dto.UserBloodTypeCountDTO(u.bloodType, COUNT(u)) " +
+                "FROM User u WHERE u.bloodType IS NOT NULL GROUP BY u.bloodType";
+        return entityManager.createQuery(jpql, UserBloodTypeCountDTO.class).getResultList();
+    }
+
+
+
+    @Override
+    public List<ClinicDoctorCountDTO> getDoctorCountByClinic() {
+        String jpql = "SELECT new com.hastanerandevu.app.dto.ClinicDoctorCountDTO(c.name, COUNT(u)) " +
+                "FROM User u JOIN u.clinic c " +
+                "WHERE u.role = com.hastanerandevu.app.model.User.Role.DOKTOR " +
+                "GROUP BY c.name";
+        return entityManager.createQuery(jpql, ClinicDoctorCountDTO.class).getResultList();
+    }
 }

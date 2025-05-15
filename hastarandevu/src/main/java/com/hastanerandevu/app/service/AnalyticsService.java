@@ -18,4 +18,10 @@ public interface AnalyticsService {
     List<ClinicComplaintCountDTO> getComplaintCountByClinic();
 
     List<TimeSlotAppointmentCountDTO> getAppointmentCountByTimeSlot();
+
+    List<UserRoleCountDTO> getUserCountByRole();
+    List<UserGenderCountDTO> getUserCountByGender();
+    List<UserBloodTypeCountDTO> getUserCountByBloodType();
+    List<ClinicDoctorCountDTO> getDoctorCountByClinic();
+
 }

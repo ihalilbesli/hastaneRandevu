@@ -28,5 +28,11 @@ public interface AnalyticsRepository {
     List<ClinicComplaintCountDTO> getComplaintCountByClinic();
 
     // 8. Saat Dilimlerine Göre Randevu Dağılımı
+
     List<TimeSlotAppointmentCountDTO> getAppointmentCountByTimeSlot();
+    List<UserRoleCountDTO> getUserCountByRole();
+    List<UserGenderCountDTO> getUserCountByGender();
+    List<UserBloodTypeCountDTO> getUserCountByBloodType();
+    List<ClinicDoctorCountDTO> getDoctorCountByClinic();
+
 }
