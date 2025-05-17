@@ -1,7 +1,9 @@
 package com.hastanerandevu.app.service.impl;
 
+import com.hastanerandevu.app.model.Clinic;
 import com.hastanerandevu.app.model.Complaint;
 import com.hastanerandevu.app.model.User;
+import com.hastanerandevu.app.repository.ClinicRepository;
 import com.hastanerandevu.app.repository.ComplaintRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.ComplaintService;
@@ -16,10 +18,12 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     private final ComplaintRepository complaintRepository;
     private final UserRepository userRepository;
+    private final ClinicRepository clinicRepository;
 
-    public ComplaintServiceImpl(ComplaintRepository complaintRepository, UserRepository userRepository) {
+    public ComplaintServiceImpl(ComplaintRepository complaintRepository, UserRepository userRepository, ClinicRepository clinicRepository) {
         this.complaintRepository = complaintRepository;
         this.userRepository = userRepository;
+        this.clinicRepository = clinicRepository;
     }
 
     /**
@@ -33,6 +37,14 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         if (currentUser.getId()!=(complaint.getUser().getId())) {
             throw new RuntimeException("Sadece kendi adınıza şikayet oluşturabilirsiniz.");
+        }
+        // Eğer klinik bilgisi varsa veritabanından doğrula
+        if (complaint.getClinic() != null) {
+            Clinic clinic = clinicRepository.findById(complaint.getClinic().getId())
+                    .orElseThrow(() -> new RuntimeException("Klinik bulunamadı."));
+            complaint.setClinic(clinic);
+        } else {
+            complaint.setClinic(null); // Klinik seçilmemişse açıkça null olarak ayarla
         }
 
         complaint.setUser(currentUser);

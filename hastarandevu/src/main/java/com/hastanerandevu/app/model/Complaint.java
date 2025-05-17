@@ -40,4 +40,8 @@ public class Complaint {
     public enum Status {
         BEKLEMEDE,INCELEMEDE, COZULDU
     }
+    @ManyToOne
+    @JoinColumn(name = "clinic_id")
+    private Clinic clinic;  //opsiyonel
+
 }

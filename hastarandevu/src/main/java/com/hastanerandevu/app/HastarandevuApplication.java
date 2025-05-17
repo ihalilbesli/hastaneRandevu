@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class HastarandevuApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HastarandevuApplication.class, args);//
+		SpringApplication.run(HastarandevuApplication.class, args);
 	}
 
 }
