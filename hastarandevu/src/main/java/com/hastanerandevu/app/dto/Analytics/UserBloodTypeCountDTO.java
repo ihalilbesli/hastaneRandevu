@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.dto;
+package com.hastanerandevu.app.dto.Analytics;
 
 import com.hastanerandevu.app.model.User;
 

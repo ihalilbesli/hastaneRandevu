@@ -1,6 +1,6 @@
 package com.hastanerandevu.app.repository;
 
-import com.hastanerandevu.app.dto.*;
+import com.hastanerandevu.app.dto.Analytics.*;
 
 import java.util.List;
 
@@ -34,5 +34,8 @@ public interface AnalyticsRepository {
     List<UserGenderCountDTO> getUserCountByGender();
     List<UserBloodTypeCountDTO> getUserCountByBloodType();
     List<ClinicDoctorCountDTO> getDoctorCountByClinic();
+
+    List<ComplaintSubjectCountDTO> getComplaintCountBySubject();
+
 
 }

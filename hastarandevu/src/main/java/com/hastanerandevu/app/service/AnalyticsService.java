@@ -1,5 +1,5 @@
 package com.hastanerandevu.app.service;
-import com.hastanerandevu.app.dto.*;
+import com.hastanerandevu.app.dto.Analytics.*;
 
 import java.util.List;
 public interface AnalyticsService {
@@ -23,5 +23,8 @@ public interface AnalyticsService {
     List<UserGenderCountDTO> getUserCountByGender();
     List<UserBloodTypeCountDTO> getUserCountByBloodType();
     List<ClinicDoctorCountDTO> getDoctorCountByClinic();
+
+    List<ComplaintSubjectCountDTO> getComplaintCountBySubject();
+
 
 }

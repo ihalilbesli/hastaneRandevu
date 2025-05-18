@@ -48,22 +48,33 @@ public class AIServiceImpl implements AIService {
                 .map(Clinic::getName)
                 .collect(Collectors.toList());
 
-        // Klinik listesini metne çevir
         String clinicListText = String.join(", ", clinicNames);
+
+        // Kronik rahatsızlığı varsa al
+        String chronicInfo = currentUser.getChronicDiseases();
+        boolean hasChronic = chronicInfo != null && !chronicInfo.trim().isEmpty();
 
         // OpenAI mesajı hazırla
         JSONObject requestBody = new JSONObject();
         requestBody.put("model", "gpt-3.5-turbo");
 
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Bir hastanın şikayeti: \"").append(complaintText).append("\".\n");
+
+        if (hasChronic) {
+            messageBuilder.append("Hastanın kronik rahatsızlığı: ").append(chronicInfo).append("\n");
+        }
+
+        messageBuilder.append("Aşağıda verilen klinik listesine göre bu şikayete en uygun olanı öner. ");
+        messageBuilder.append("Sadece veritabanındaki kliniklere yönlendir, başka bir şey yazma. ");
+        messageBuilder.append("Ayrıca hastaya geleneksel tıbbi bir tavsiye ver. ");
+        messageBuilder.append("Klinikler:\n").append(clinicListText).append("\n");
+        messageBuilder.append("Cevap formatı: Poliklinik: ...\nTavsiye: ... şeklinde olsun.");
+
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(Map.of(
                 "role", "user",
-                "content", "Bir hastanın şikayeti: \"" + complaintText +
-                        "\". Aşağıda verilen klinik listesine göre bu şikayete en uygun olanı öner. " +
-                        "Sadece veritabanındaki kliniklere yönlendir, başka bir şey yazma. " +
-                        "Ayrıca hastaya geleneksel tıbbi bir tavsiye ver. " +
-                        "Klinikler:\n" + clinicListText +
-                        "\nCevap formatı: Poliklinik: ...\nTavsiye: ... şeklinde olsun (Sadece yukarıdaki klinikler geçerli)."
+                "content", messageBuilder.toString()
         ));
 
         requestBody.put("messages", messages);

@@ -40,4 +40,6 @@ public interface UserService {
     void deleteUserById(Long id);
     User updateUser(Long id, User updatedUser);
 
+    List<User> getAllUsers();
+
 }

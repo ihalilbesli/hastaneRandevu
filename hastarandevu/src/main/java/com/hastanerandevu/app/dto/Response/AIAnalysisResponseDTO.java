@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.dto;
+package com.hastanerandevu.app.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

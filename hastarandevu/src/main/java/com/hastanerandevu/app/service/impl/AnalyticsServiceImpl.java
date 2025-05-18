@@ -1,6 +1,6 @@
 package com.hastanerandevu.app.service.impl;
 
-import com.hastanerandevu.app.dto.*;
+import com.hastanerandevu.app.dto.Analytics.*;
 import com.hastanerandevu.app.repository.AnalyticsRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.AnalyticsService;
@@ -95,5 +95,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     public List<ClinicDoctorCountDTO> getDoctorCountByClinic() {
         checkAdminAccess();
         return analyticsRepository.getDoctorCountByClinic();
+    }
+
+    @Override
+    public List<ComplaintSubjectCountDTO> getComplaintCountBySubject() {
+        checkAdminAccess();
+        return analyticsRepository.getComplaintCountBySubject();
     }
 }

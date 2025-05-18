@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -48,21 +50,22 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column
-    private Bloodtype  bloodType;  //(hasta icin)
+    private Bloodtype bloodType;
 
     @Column
-    private String chronicDiseases; //kronik rahatsizlik (hasta icin)
+    private String chronicDiseases;
 
     @Column
-    private String specialization; //uzmanlik (doktor icin)
+    private String specialization;
 
     @ManyToOne
-    @JoinColumn(name = "clinic_id") //clinic (doktor icin)
+    @JoinColumn(name = "clinic_id")
     private Clinic clinic;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() ->"ROLE_"+ role.name());
+        return List.of(() -> "ROLE_" + role.name());
     }
 
     @Override
@@ -70,35 +73,39 @@ public class User implements UserDetails {
         return email;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
-         return true;
+        return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
     }
 
-
     public enum Role {
         HASTA, DOKTOR, ADMIN
     }
-    public enum Gender{
-        ERKEK,KADIN,BELIRTILMEMIS
-    }
-    public enum Bloodtype{
-        ARH_POS, ARH_NEG, BRH_POS, BRH_NEG, ABRH_POS, ABRH_NEG, ORH_POS, ORH_NEG
+
+    public enum Gender {
+        ERKEK, KADIN, BELIRTILMEMIS
     }
 
+    public enum Bloodtype {
+        ARH_POS, ARH_NEG, BRH_POS, BRH_NEG, ABRH_POS, ABRH_NEG, ORH_POS, ORH_NEG
+    }
 }

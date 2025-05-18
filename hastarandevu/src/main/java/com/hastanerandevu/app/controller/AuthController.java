@@ -1,6 +1,6 @@
 package com.hastanerandevu.app.controller;
 
-import com.hastanerandevu.app.dto.AuthResponse;
+import com.hastanerandevu.app.dto.Auth.AuthResponse;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.AuthService;
 import com.hastanerandevu.app.util.JwtUtil;

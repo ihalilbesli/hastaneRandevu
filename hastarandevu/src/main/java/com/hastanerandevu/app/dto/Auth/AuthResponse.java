@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.dto;
+package com.hastanerandevu.app.dto.Auth;
 
 import lombok.Getter;
 import lombok.Setter;

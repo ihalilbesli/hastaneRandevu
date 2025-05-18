@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.dto;
+package com.hastanerandevu.app.dto.Analytics;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//Her kliniğe ait toplam randevu sayısı
-public class ClinicAppointmentCountDTO {
+public class ClinicDoctorCountDTO {
     private String clinicName;
-    private long appointmentCount;
-
+    private long count;
 }

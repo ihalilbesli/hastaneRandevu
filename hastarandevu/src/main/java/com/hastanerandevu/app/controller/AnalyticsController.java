@@ -1,5 +1,5 @@
 package com.hastanerandevu.app.controller;
-import com.hastanerandevu.app.dto.*;
+import com.hastanerandevu.app.dto.Analytics.*;
 import com.hastanerandevu.app.service.AnalyticsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -82,6 +82,10 @@ public class AnalyticsController {
     @GetMapping("/clinics/doctor-count")
     public ResponseEntity<List<ClinicDoctorCountDTO>> getDoctorCountByClinic() {
         return ResponseEntity.ok(analyticsService.getDoctorCountByClinic());
+    }
+    @GetMapping("/complaints/subject")
+    public ResponseEntity<List<ComplaintSubjectCountDTO>> getComplaintCountBySubject() {
+        return ResponseEntity.ok(analyticsService.getComplaintCountBySubject());
     }
 
 }

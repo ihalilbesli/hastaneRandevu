@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.dto;
+package com.hastanerandevu.app.dto.Analytics;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClinicDoctorCountDTO {
+//Cliniklere gore sikayet sayisi
+public class ClinicComplaintCountDTO {
     private String clinicName;
-    private long count;
+    private Long complaintCount;
 }

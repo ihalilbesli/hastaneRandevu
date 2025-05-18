@@ -141,5 +141,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Override
+    public List<User> getAllUsers() {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Sadece admin tüm kullanıcıları görüntüleyebilir.");
+        }
+
+        return userRepository.findAll(); // Direkt User nesnelerini döndür
+    }
+
+
 
 }

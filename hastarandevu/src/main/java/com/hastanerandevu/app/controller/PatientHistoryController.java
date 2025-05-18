@@ -62,4 +62,8 @@ public class PatientHistoryController {
     public ResponseEntity<List<PatientHistory>> searchByTreatment(@RequestParam String keyword) {
         return ResponseEntity.ok(patientHistoryService.searchHistoriesByTreatment(keyword));
     }
+    @GetMapping
+    public ResponseEntity<List<PatientHistory>> getAllHistories() {
+        return ResponseEntity.ok(patientHistoryService.getAllHistories());
+    }
 }
