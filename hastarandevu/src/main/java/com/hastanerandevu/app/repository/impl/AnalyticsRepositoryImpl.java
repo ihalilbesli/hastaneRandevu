@@ -17,7 +17,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<ClinicAppointmentCountDTO> getAppointmentCountByClinic() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.ClinicAppointmentCountDTO(c.name, COUNT(a))
+            SELECT new com.hastanerandevu.app.dto.Analytics.ClinicAppointmentCountDTO(c.name, COUNT(a))
             FROM Appointments a
             JOIN a.clinic c
             WHERE a.status = com.hastanerandevu.app.model.Appointments.Status.COMPLETED
@@ -29,7 +29,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<DateAppointmentCountDTO> getAppointmentCountByDate() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.DateAppointmentCountDTO(a.date, COUNT(a))
+            SELECT new com.hastanerandevu.app.dto.Analytics.DateAppointmentCountDTO(a.date, COUNT(a))
             FROM Appointments a
             WHERE a.status = com.hastanerandevu.app.model.Appointments.Status.COMPLETED
             GROUP BY a.date
@@ -41,7 +41,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<AppointmentStatusCountDTO> getAppointmentCountByStatus() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.AppointmentStatusCountDTO(a.status, COUNT(a))
+            SELECT new com.hastanerandevu.app.dto.Analytics.AppointmentStatusCountDTO(a.status, COUNT(a))
             FROM Appointments a
             GROUP BY a.status
         """;
@@ -51,7 +51,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<DoctorAppointmentCountDTO> getAppointmentCountByDoctor() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.DoctorAppointmentCountDTO(CONCAT(d.name, ' ', d.surname), COUNT(a))
+            SELECT new com.hastanerandevu.app.dto.Analytics.DoctorAppointmentCountDTO(CONCAT(d.name, ' ', d.surname), COUNT(a))
             FROM Appointments a
             JOIN a.doctor d
             WHERE a.status = com.hastanerandevu.app.model.Appointments.Status.COMPLETED
@@ -63,7 +63,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<MonthlyUserRegistrationDTO> getMonthlyUserRegistration() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.MonthlyUserRegistrationDTO(
+            SELECT new com.hastanerandevu.app.dto.Analytics.MonthlyUserRegistrationDTO(
                 FUNCTION('DATE_FORMAT', u.createdAt, '%Y-%m'), u.role, COUNT(u))
             FROM User u
             GROUP BY FUNCTION('DATE_FORMAT', u.createdAt, '%Y-%m'), u.role
@@ -75,7 +75,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<ComplaintStatusCountDTO> getComplaintCountByStatus() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.ComplaintStatusCountDTO(c.status, COUNT(c))
+            SELECT new com.hastanerandevu.app.dto.Analytics.ComplaintStatusCountDTO(c.status, COUNT(c))
             FROM Complaint c
             GROUP BY c.status
         """;
@@ -85,7 +85,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<ClinicComplaintCountDTO> getComplaintCountByClinic() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.ClinicComplaintCountDTO(c.clinic.name, COUNT(c))
+            SELECT new com.hastanerandevu.app.dto.Analytics.ClinicComplaintCountDTO(c.clinic.name, COUNT(c))
             FROM Complaint c
             WHERE c.clinic IS NOT NULL
             GROUP BY c.clinic.name
@@ -96,7 +96,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<TimeSlotAppointmentCountDTO> getAppointmentCountByTimeSlot() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.TimeSlotAppointmentCountDTO(FUNCTION('DATE_FORMAT', a.time, '%H:%i'), COUNT(a))
+            SELECT new com.hastanerandevu.app.dto.Analytics.TimeSlotAppointmentCountDTO(FUNCTION('DATE_FORMAT', a.time, '%H:%i'), COUNT(a))
             FROM Appointments a
             WHERE a.status = com.hastanerandevu.app.model.Appointments.Status.COMPLETED
             GROUP BY FUNCTION('DATE_FORMAT', a.time, '%H:%i')
@@ -108,7 +108,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<UserRoleCountDTO> getUserCountByRole() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.UserRoleCountDTO(u.role, COUNT(u))
+            SELECT new com.hastanerandevu.app.dto.Analytics.UserRoleCountDTO(u.role, COUNT(u))
             FROM User u
             GROUP BY u.role
         """;
@@ -118,7 +118,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<UserGenderCountDTO> getUserCountByGender() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.UserGenderCountDTO(u.gender, COUNT(u))
+            SELECT new com.hastanerandevu.app.dto.Analytics.UserGenderCountDTO(u.gender, COUNT(u))
             FROM User u
             GROUP BY u.gender
         """;
@@ -128,7 +128,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<UserBloodTypeCountDTO> getUserCountByBloodType() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.UserBloodTypeCountDTO(u.bloodType, COUNT(u))
+            SELECT new com.hastanerandevu.app.dto.Analytics.UserBloodTypeCountDTO(u.bloodType, COUNT(u))
             FROM User u
             WHERE u.bloodType IS NOT NULL
             GROUP BY u.bloodType
@@ -139,7 +139,7 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<ClinicDoctorCountDTO> getDoctorCountByClinic() {
         String jpql = """
-            SELECT new com.hastanerandevu.app.dto.ClinicDoctorCountDTO(c.name, COUNT(u))
+            SELECT new com.hastanerandevu.app.dto.Analytics.ClinicDoctorCountDTO(c.name, COUNT(u))
             FROM User u
             JOIN u.clinic c
             WHERE u.role = com.hastanerandevu.app.model.User.Role.DOKTOR
@@ -151,10 +151,10 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
     @Override
     public List<ComplaintSubjectCountDTO> getComplaintCountBySubject() {
         String jpql = """
-        SELECT new com.hastanerandevu.app.dto.ComplaintSubjectCountDTO(c.subject, COUNT(c))
-        FROM Complaint c
-        GROUP BY c.subject
-    """;
+            SELECT new com.hastanerandevu.app.dto.Analytics.ComplaintSubjectCountDTO(c.subject, COUNT(c))
+            FROM Complaint c
+            GROUP BY c.subject
+        """;
         return entityManager.createQuery(jpql, ComplaintSubjectCountDTO.class).getResultList();
     }
 }

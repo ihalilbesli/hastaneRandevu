@@ -54,8 +54,14 @@ public class ExportServiceImpl implements ExportService {
         List<User> users = userRepository.findAll();
 
         String csv = users.stream()
-                .map(u -> u.getId() + "," + u.getName() + "," + u.getSurname() + "," + u.getEmail() + "," + u.getRole())
-                .collect(Collectors.joining("\n", "ID,Ad,Soyad,Email,Rol\n", ""));
+                .map(u -> u.getBirthDate() + "," + u.getId() + "," + u.getName() + "," + u.getSurname() + "," + u.getEmail()
+                        + "," + u.getPhoneNumber() + "," + u.getRole() + "," + u.getGender()
+                        + "," + u.getBloodType()
+                        + "," + (u.getChronicDiseases() == null ? "-" : u.getChronicDiseases())
+                        + "," + (u.getSpecialization() == null ? "-" : u.getSpecialization())
+                        + "," + (u.getClinic() == null ? "-" : u.getClinic().getName())
+                )
+                .collect(Collectors.joining("\n", "Doğum Tarihi,ID,Ad,Soyad,Email,Telefon,Rol,Cinsiyet,Kan Grubu,Kronik Hastalık,Uzmanlık,Klinik\n", ""));
 
         return toCsvResponse(csv, "users.csv");
     }
@@ -66,8 +72,12 @@ public class ExportServiceImpl implements ExportService {
         List<Appointments> list = appointmentRepository.findAll();
 
         String csv = list.stream()
-                .map(a -> a.getId() + "," + a.getDate() + "," + a.getTime() + "," + a.getPatient().getEmail() + "," + a.getDoctor().getEmail() + "," + a.getClinic().getName() + "," + a.getStatus())
-                .collect(Collectors.joining("\n", "ID,Tarih,Saat,Hasta,Doktor,Klinik,Durum\n", ""));
+                .map(a -> a.getId() + "," + a.getPatient().getName() + " " + a.getPatient().getSurname()
+                        + "," + a.getDoctor().getName() + " " + a.getDoctor().getSurname()
+                        + "," + a.getClinic().getName()
+                        + "," + a.getDate() + "," + a.getTime()
+                        + "," + a.getStatus() + "," + a.getDescription().replaceAll(",", " "))
+                .collect(Collectors.joining("\n", "ID,Hasta,Doktor,Klinik,Tarih,Saat,Durum,Açıklama\n", ""));
 
         return toCsvResponse(csv, "appointments.csv");
     }
@@ -78,22 +88,15 @@ public class ExportServiceImpl implements ExportService {
         List<Complaint> list = complaintRepository.findAll();
 
         String csv = list.stream()
-                .map(c -> c.getId() + "," + c.getUser().getEmail() + "," + c.getSubject() + "," + c.getContent().replaceAll(",", " ") + "," + c.getStatus() + "," + c.getCreatedAt())
-                .collect(Collectors.joining("\n", "ID,Hasta,Konusu,İçerik,Durum,Tarih\n", ""));
+                .map(c -> c.getId() + "," + c.getSubject()
+                        + "," + c.getContent().replaceAll(",", " ")
+                        + "," + c.getStatus() + "," + c.getCreatedAt()
+                        + "," + (c.getAdminNote() == null ? "-" : c.getAdminNote().replaceAll(",", " "))
+                        + "," + (c.getClinic() == null ? "-" : c.getClinic().getName())
+                        + "," + c.getUser().getName() + " " + c.getUser().getSurname())
+                .collect(Collectors.joining("\n", "ID,Konusu,İçerik,Durum,Oluşturulma Tarihi,Yönetici Notu,Klinik,Kullanıcı\n", ""));
 
         return toCsvResponse(csv, "complaints.csv");
-    }
-
-    @Override
-    public ResponseEntity<Resource> exportTestResults() {
-        requireAdmin();
-        List<TestResult> list = testResultRepository.findAll();
-
-        String csv = list.stream()
-                .map(t -> t.getId() + "," + t.getTestName() + "," + t.getTestType() + "," + t.getPatient().getEmail() + "," + t.getDoctor().getEmail() + "," + t.getTestDate())
-                .collect(Collectors.joining("\n", "ID,Test Adı,Test Türü,Hasta,Doktor,Tarih\n", ""));
-
-        return toCsvResponse(csv, "test_results.csv");
     }
 
     @Override
@@ -102,10 +105,30 @@ public class ExportServiceImpl implements ExportService {
         List<Prescription> list = prescriptionRepository.findAll();
 
         String csv = list.stream()
-                .map(p -> p.getId() + "," + p.getPrescriptionCode() + "," + p.getDate() + "," + p.getPatient().getEmail() + "," + p.getDoctor().getEmail() + "," + p.getMedications().replaceAll(",", ";"))
-                .collect(Collectors.joining("\n", "ID,Kod,Tarih,Hasta,Doktor,İlaçlar\n", ""));
+                .map(p -> p.getId() + "," + p.getPrescriptionCode() + "," + p.getDate()
+                        + "," + p.getDescription().replaceAll(",", " ")
+                        + "," + p.getMedications().replaceAll(",", ";")
+                        + "," + p.getDoctor().getName() + " " + p.getDoctor().getSurname()
+                        + "," + p.getPatient().getName() + " " + p.getPatient().getSurname())
+                .collect(Collectors.joining("\n", "ID,Reçete Kodu,Tarih,Açıklama,İlaçlar,Doktor,Hasta\n", ""));
 
         return toCsvResponse(csv, "prescriptions.csv");
+    }
+
+    @Override
+    public ResponseEntity<Resource> exportTestResults() {
+        requireAdmin();
+        List<TestResult> list = testResultRepository.findAll();
+
+        String csv = list.stream()
+                .map(t -> t.getId() + "," + t.getPatient().getName() + " " + t.getPatient().getSurname()
+                        + "," + t.getDoctor().getName() + " " + t.getDoctor().getSurname()
+                        + "," + t.getTestDate() + "," + t.getTestName() + "," + t.getTestType()
+                        + "," + t.getResult().replaceAll(",", " ")
+                        + "," + (t.getDoctorComment() == null ? "-" : t.getDoctorComment().replaceAll(",", " ")))
+                .collect(Collectors.joining("\n", "ID,Hasta,Doktor,Test Tarihi,Test Adı,Test Türü,Sonuç,Doktor Yorumu\n", ""));
+
+        return toCsvResponse(csv, "test-results.csv");
     }
 
     @Override
@@ -114,10 +137,15 @@ public class ExportServiceImpl implements ExportService {
         List<PatientHistory> list = patientHistoryRepository.findAll();
 
         String csv = list.stream()
-                .map(h -> h.getId() + "," + h.getPatient().getEmail() + "," + h.getDoctor().getEmail() + "," + h.getDate() + "," + h.getDiagnosis().replaceAll(",", ";") + "," + h.getTreatment().replaceAll(",", ";"))
-                .collect(Collectors.joining("\n", "ID,Hasta,Doktor,Tarih,Tanı,Tedavi\n", ""));
+                .map(h -> h.getId() + "," + h.getPatient().getName() + " " + h.getPatient().getSurname()
+                        + "," + h.getDoctor().getName() + " " + h.getDoctor().getSurname()
+                        + "," + h.getDiagnosis().replaceAll(",", ";")
+                        + "," + h.getTreatment().replaceAll(",", ";")
+                        + "," + (h.getNotes() == null ? "-" : h.getNotes().replaceAll(",", " "))
+                        + "," + h.getDate())
+                .collect(Collectors.joining("\n", "ID,Hasta,Doktor,Teşhis,Tedavi,Notlar,Tarih\n", ""));
 
-        return toCsvResponse(csv, "patient_histories.csv");
+        return toCsvResponse(csv, "patient-histories.csv");
     }
 
     @Override
@@ -126,12 +154,15 @@ public class ExportServiceImpl implements ExportService {
         List<PatientReports> list = patientReportRepository.findAll();
 
         String csv = list.stream()
-                .map(r -> r.getId() + "," + r.getReportType() + "," + r.getReportDate() + "," + r.getPatient().getEmail() + "," + r.getDoctor().getEmail())
-                .collect(Collectors.joining("\n", "ID,Rapor Türü,Tarih,Hasta,Doktor\n", ""));
+                .map(r -> r.getId() + "," + r.getPatient().getName() + " " + r.getPatient().getSurname()
+                        + "," + r.getDoctor().getName() + " " + r.getDoctor().getSurname()
+                        + "," + r.getReportType()
+                        + "," + r.getReportDate()
+                        + "," + r.getFileUrl())
+                .collect(Collectors.joining("\n", "ID,Hasta,Doktor,Rapor Türü,Tarih,Dosya\n", ""));
 
-        return toCsvResponse(csv, "patient_reports.csv");
+        return toCsvResponse(csv, "patient-reports.csv");
     }
-
     // Ortak CSV dönüştürücü - içerik ve dosya adı ile ResponseEntity üretir
     private ResponseEntity<Resource> toCsvResponse(String csv, String filename) {
         ByteArrayResource resource = new ByteArrayResource(csv.getBytes(StandardCharsets.UTF_8));
