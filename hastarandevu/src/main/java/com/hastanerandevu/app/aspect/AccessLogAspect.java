@@ -4,30 +4,32 @@ import com.hastanerandevu.app.model.AccessLog;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.AccessLogService;
+import com.hastanerandevu.app.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.hastanerandevu.app.util.SecurityUtil;
 
 import java.time.LocalDateTime;
 
 @Aspect
 @Component
 public class AccessLogAspect {
+
     private final AccessLogService accessLogService;
     private final UserRepository userRepository;
 
-    public AccessLogAspect(AccessLogService accessLogService, UserRepository userRepository) {
+    public AccessLogAspect(AccessLogService accessLogService, UserRepository userRepositoryl, UserRepository userRepository) {
         this.accessLogService = accessLogService;
+
         this.userRepository = userRepository;
     }
+
     // ✅ Controller sınıflarındaki tüm public methodları hedef al
     @Pointcut("execution(public * com.hastanerandevu.app.controller..*(..))")
     public void controllerMethods() {}
@@ -51,14 +53,22 @@ public class AccessLogAspect {
 
         HttpServletRequest request = attributes.getRequest();
 
+        // 🚨 Eksik olan kontrol burada
+        String email = SecurityUtil.getCurrentUserId();
+        if ("anonymousUser".equals(email)) {
+            return; // Token yok, kimlik doğrulama yapılmamış. Loglama.
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));
+
+        String userEmail = user.getEmail();
+        String role = user.getRole().name();
+
         String httpMethod = request.getMethod();
         String endpoint = request.getRequestURI();
         String entity = extractEntityName(joinPoint);
         String actionType = extractActionType(httpMethod);
-
-        User user = SecurityUtil.getCurrentUser(userRepository);
-        String userEmail = user.getEmail();
-        String role = user.getRole().name();
 
         AccessLog log = new AccessLog();
         log.setTimestamp(LocalDateTime.now());
@@ -73,6 +83,7 @@ public class AccessLogAspect {
 
         accessLogService.saveLog(log);
     }
+
 
     private String extractEntityName(JoinPoint joinPoint) {
         String className = joinPoint.getTarget().getClass().getSimpleName();
