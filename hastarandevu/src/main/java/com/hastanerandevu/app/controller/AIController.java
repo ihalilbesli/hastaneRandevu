@@ -32,14 +32,6 @@ public class AIController {
         return ResponseEntity.ok(result);
     }
 
-    // 4️ Admin: Açılması gereken yeni klinikler
-    @GetMapping("/admin/suggest-clinics")
-    public ResponseEntity<String> suggestClinicsToOpen() {
-        String result = aiService.suggestClinicsToOpen();
-        return ResponseEntity.ok(result);
-
-    }
-
     // 5 Admin: Kullanıcı davranış analizi
     @GetMapping("/admin/analyze-user-behavior")
     public ResponseEntity<String> analyzeUserBehavior() {

@@ -11,8 +11,6 @@ public interface AIService {
     // 2️⃣ Klinik yoğunluklarını analiz et
     String analyzeClinicLoad();
 
-    // 3️⃣ Açılması gereken yeni klinik öner
-    String suggestClinicsToOpen();
 
     // 4️⃣ Kullanıcı davranışlarını analiz et
     String analyzeUserBehavior();

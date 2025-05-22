@@ -4,6 +4,8 @@ import com.hastanerandevu.app.model.Appointments;
 import com.hastanerandevu.app.model.Clinic;
 import com.hastanerandevu.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -53,6 +55,17 @@ public interface AppointmentRepository extends JpaRepository<Appointments,Long> 
     List<Appointments> findByDateAfter(LocalDate date);
     List<Appointments> findByDescriptionContainingIgnoreCase(String keyword);
     long countByStatus(Appointments.Status status);
+
+    @Query("""
+    SELECT a.clinic 
+    FROM Appointments a 
+    WHERE a.date >= :date 
+    GROUP BY a.clinic 
+    ORDER BY COUNT(a) DESC
+""")
+    List<Clinic> findTopClinicsByDate(@Param("date") LocalDate date);
+
+
 
 
 
