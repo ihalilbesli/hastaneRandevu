@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -173,19 +174,56 @@ public class AIServiceImpl implements AIService {
         List<User> users = userRepository.findAll();
 
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Aşağıda bazı kullanıcı bilgileri (yaş, cinsiyet, kan grubu, kronik hastalık) verilmiştir.\n");
-        prompt.append("Bu verilere göre kullanıcı davranışları hakkında genel bir analiz yap.\n\n");
+        prompt.append("""
+        Aşağıda hastane sistemine kayıtlı kullanıcıların (hastaların) yaş, cinsiyet, kan grubu ve kronik hastalık bilgileri yer almaktadır.
+
+        Lütfen bu verileri yöneticiye (admin) yönelik profesyonel analiz raporu olarak değerlendir:
+
+        1. Yaş grubu, cinsiyet, kan grubu ve kronik hastalık dağılımını yüzdeli ve sayısal olarak özetle.
+        2. Eksik veri yüzdesini belirt (özellikle yaş, cinsiyet, kan grubu).
+        3. Yaş grubuna göre hastalık riski analizi yap (örn. yaşlılarda hipertansiyon yaygın mı?).
+        4. Yöneticiye özel aksiyon önerileri sun (eksik veri tamamlama, yaşlı/kronik hastalar için izlem, kadın sağlığı birimi gerekliliği gibi).
+        
+        Kullanıcı Verileri:
+        """);
+
+        // Yaş grubu istatistikleri
+        Map<String, Integer> ageGroupStats = new HashMap<>();
+        int totalUsers = users.size();
+        int missingBirthDate = 0;
 
         for (User u : users) {
+            int age = calculateAge(u.getBirthDate());
+            String ageGroup = getAgeGroup(age);
+            ageGroupStats.merge(ageGroup, 1, Integer::sum);
+
             prompt.append("- ").append(u.getName()).append(" ").append(u.getSurname());
+            prompt.append(", Yaş: ").append(age > 0 ? age : "Bilinmiyor");
+            prompt.append(", Yaş Grubu: ").append(ageGroup);
             prompt.append(", Cinsiyet: ").append(u.getGender());
-            prompt.append(", Kan Grubu: ").append(u.getBloodType());
-            prompt.append(", Kronik: ").append(u.getChronicDiseases() != null ? u.getChronicDiseases() : "Yok");
+            prompt.append(", Kan Grubu: ").append(u.getBloodType() != null ? u.getBloodType() : "Belirtilmemiş");
+            prompt.append(", Kronik Hastalık: ").append(
+                    (u.getChronicDiseases() != null && !u.getChronicDiseases().isBlank()) ? u.getChronicDiseases() : "Yok"
+            );
             prompt.append("\n");
+
+            if (age < 0) missingBirthDate++;
         }
+
+        prompt.append("\nYaş Grubu Dağılımı:\n");
+        for (Map.Entry<String, Integer> entry : ageGroupStats.entrySet()) {
+            double percentage = (entry.getValue() * 100.0) / totalUsers;
+            prompt.append("- ").append(entry.getKey()).append(": ")
+                    .append(entry.getValue()).append(" kullanıcı (")
+                    .append(String.format("%.1f", percentage)).append("%)\n");
+        }
+
+        prompt.append("\nEksik Bilgi:\n");
+        prompt.append("- Yaşı bilinmeyen kullanıcı sayısı: ").append(missingBirthDate).append("\n");
 
         return sendToOpenAI(prompt.toString());
     }
+
 
     @Override
     public String generateRiskAlerts() {
@@ -194,23 +232,78 @@ public class AIServiceImpl implements AIService {
         }
 
         List<Complaint> complaints = complaintRepository.findAllByOrderByCreatedAtDesc();
+        List<Appointments> allAppointments = appointmentRepository.findAll();
+
+        LocalDate oneWeekAgo = LocalDate.now().minusDays(7);
+        List<Appointments> recentAppointments = allAppointments.stream()
+                .filter(a -> a.getDate().isAfter(oneWeekAgo))
+                .toList();
+
+        Map<String, Long> complaintCountByClinic = complaints.stream()
+                .filter(c -> c.getClinic() != null)
+                .collect(Collectors.groupingBy(c -> c.getClinic().getName(), Collectors.counting()));
+
+        Map<String, List<Appointments>> appointmentsByClinic = recentAppointments.stream()
+                .filter(a -> a.getClinic() != null)
+                .collect(Collectors.groupingBy(a -> a.getClinic().getName()));
 
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Aşağıda gelen şikayetler verilmiştir.\n");
-        prompt.append("Bunları analiz ederek:\n");
-        prompt.append("- Belirli kliniklerde artan sorunları belirt,\n");
-        prompt.append("- Riskli durumları erken uyarı olarak bildir.\n\n");
+        prompt.append("""
+        Aşağıda hastaneye ait son şikayet kayıtları ve son 1 haftalık randevu geçmişi verilmiştir.
 
-        for (Complaint c : complaints) {
-            prompt.append("- Konu: ").append(c.getSubject()).append(" — İçerik: ").append(c.getContent());
-            if (c.getClinic() != null) {
-                prompt.append(" [Klinik: ").append(c.getClinic().getName()).append("]");
+        Lütfen bu veriler ışığında aşağıdaki kriterlere göre erken uyarı ve risk değerlendirmesi yap:
+        - Aynı kliniğe gelen tekrar eden şikayetler
+        - Artan randevu iptali ve geç gelme oranları
+        - Kliniklerde memnuniyetsizlik trendi
+        - Sistemsel eksiklikler
+
+        Her durum için aşağıdaki şablonu kullan:
+        🔹 Klinik/Sistem Adı
+        - Uyarı Sebebi:
+        - Erken Uyarı Notu:
+        - Yöneticiye Stratejik Öneri:
+        \n
+        """);
+
+        for (var entry : appointmentsByClinic.entrySet()) {
+            String clinicName = entry.getKey();
+            List<Appointments> clinicAppointments = entry.getValue();
+            long total = clinicAppointments.size();
+            long iptal = clinicAppointments.stream().filter(a -> a.getStatus() == Appointments.Status.IPTAL_EDILDI).count();
+            long gecKalan = clinicAppointments.stream().filter(a -> a.getStatus() == Appointments.Status.GEC_KALINDI).count();
+
+            double iptalOran = (double) iptal / total * 100;
+            double gecOran = (double) gecKalan / total * 100;
+            long sikayetSayisi = complaintCountByClinic.getOrDefault(clinicName, 0L);
+
+            if (iptalOran >= 20 || gecOran >= 20 || sikayetSayisi >= 3) {
+                prompt.append("🔹 Klinik: ").append(clinicName).append("\n");
+                prompt.append("- Uyarı Sebebi: ");
+                if (iptalOran >= 20) prompt.append("Yüksek randevu iptal oranı (").append(String.format("%.1f", iptalOran)).append("%). ");
+                if (gecOran >= 20) prompt.append("Geç kalınan randevu oranı yüksek (").append(String.format("%.1f", gecOran)).append("%). ");
+                if (sikayetSayisi >= 3) prompt.append("3+ tekrar eden şikayet. ");
+                prompt.append("\n");
+
+                prompt.append("- Erken Uyarı Notu: ");
+                prompt.append("Bu klinikte son 1 haftada ").append(total).append(" randevu planlandı. ")
+                        .append(iptal).append(" iptal (%").append(String.format("%.1f", iptalOran)).append("), ")
+                        .append(gecKalan).append(" geç kalma (%").append(String.format("%.1f", gecOran)).append(") tespit edildi.\n");
+
+                prompt.append("- Yöneticiye Stratejik Öneri: Klinik süreçleri gözden geçirilmeli. Randevu iptalleri için SMS/email hatırlatma artırılmalı, personel eğitimi verilmeli. ");
+                if (sikayetSayisi >= 3) {
+                    prompt.append("Ayrıca şikayet konuları analiz edilerek çözüm süreci başlatılmalı.");
+                }
+                prompt.append("\n\n");
             }
-            prompt.append("\n");
         }
+
+        prompt.append("📌 Not: Yalnızca yüksek riskli klinikler listelenmiştir. Diğer kliniklerde ciddi bir risk bulunmamaktadır.\n");
 
         return sendToOpenAI(prompt.toString());
     }
+
+
+
 
     // Ortak OpenAI gönderimi
     private String sendToOpenAI(String prompt) {
@@ -241,5 +334,23 @@ public class AIServiceImpl implements AIService {
         } else {
             return "Yapay zeka şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.";
         }
+    }
+
+
+    private int calculateAge(String birthDateStr) {
+        try {
+            LocalDate birthDate = LocalDate.parse(birthDateStr);
+            return Period.between(birthDate, LocalDate.now()).getYears();
+        } catch (Exception e) {
+            return -1; // bilinmiyor
+        }
+    }
+
+    private String getAgeGroup(int age) {
+        if (age < 0) return "Bilinmiyor";
+        if (age < 18) return "Çocuk";
+        else if (age < 35) return "Genç";
+        else if (age < 60) return "Orta Yaş";
+        else return "Yaşlı";
     }
 }
