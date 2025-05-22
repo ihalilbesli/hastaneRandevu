@@ -20,8 +20,16 @@ public class SecurityUtil {
                         .equalsIgnoreCase("ROLE_" + roleName));
     }
     public static User getCurrentUser(UserRepository userRepository) {
-        String email = getCurrentUserId();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Giriş yapılmamış kullanıcı.");
+        }
+
+        String email = authentication.getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));//
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + email));
     }
 }
