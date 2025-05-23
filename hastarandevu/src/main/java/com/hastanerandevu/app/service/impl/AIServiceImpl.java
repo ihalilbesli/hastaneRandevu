@@ -301,7 +301,34 @@ public class AIServiceImpl implements AIService {
 
         return sendToOpenAI(prompt.toString());
     }
+    @Override
+    public String analyzeChart(String chartTitle, List<String> labels, List<Long> values) {
+        if (!SecurityUtil.hasRole("ADMIN")) {
+            throw new RuntimeException("Bu işlem yalnızca admin tarafından yapılabilir.");
+        }
 
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Grafik başlığı: ").append(chartTitle).append("\n");
+        prompt.append("Aşağıda grafik verileri (etiket ve sayısal değer) listelenmiştir:\n");
+
+        for (int i = 0; i < labels.size(); i++) {
+            prompt.append("- ").append(labels.get(i)).append(": ").append(values.get(i)).append("\n");
+        }
+
+        prompt.append("""
+Yukarıdaki grafik verilerine göre aşağıdaki kurallara uyarak profesyonel ve sezgisel bir yorum üret:
+
+- Veriyi tekrar etme, grafik üzerinden anlam çıkar.
+- Kategoriler arasındaki farkları değerlendir. Öne çıkan ya da geri kalan varsa belirt.
+- Sayısal dengesizlik varsa neden sonuç kurarak yorum yap (örn: “X grubunun yüksekliği, Y hizmetine olan talebi artırabilir.”).
+- Cevaplar yöneticinin strateji geliştirmesine yardımcı olacak yorumlar içermeli. Yani analiz odaklı olmalı.
+- Teknik terimlerden kaçın, sade ve anlaşılır yaz.
+- Kesin hükümler verme, “olabilir, gösterebilir, dikkat çekici” gibi nötr dil kullan.
+-  **Not:** Eğer grafik “Kan Grubu Dağılımı” içeriyorsa, bu grafik hasta profilini gösterir, kan bağışı ile ilgili değildir.
+""");
+
+        return sendToOpenAI(prompt.toString());
+    }
 
 
 

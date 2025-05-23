@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.controller;
 
+import com.hastanerandevu.app.dto.Analytics.ChartAnalysisRequest;
 import com.hastanerandevu.app.service.AIService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +52,13 @@ public class AIController {
     public static class ComplaintRequest {
         public String complaintText;
     }
+
+    @PostMapping("/analyze-graph")
+    public ResponseEntity<String> analyzeGraph(@RequestBody ChartAnalysisRequest req) {
+        String response = aiService.analyzeChart(req.getChartTitle(), req.getLabels(), req.getValues());
+        return ResponseEntity.ok(response);
+    }
+
+
 
 }

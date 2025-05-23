@@ -1,5 +1,7 @@
 package com.hastanerandevu.app.service;
 
+import java.util.List;
+
 public interface AIService {
 
     String analyzeComplaint(String complaintText);
@@ -17,4 +19,7 @@ public interface AIService {
 
     // 5️⃣ Riskli durumları ve erken uyarıları döndür
     String generateRiskAlerts();
+
+    String analyzeChart(String chartTitle, List<String> labels, List<Long> values);
+
 }
