@@ -53,9 +53,11 @@ public class ClinicController {
     @PutMapping("/{id}/activate")
     public ResponseEntity<Void> activateClinic(@PathVariable Long id) {
         clinicService.activateClinic(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); 
     }
     // 🔥 Belirli kliniğe ait doktorları getir
+    // Belirli bir klinik ID'sine sahip klinikte çalışan doktorların listesini getirir
+    // Endpoint: GET /hastarandevu/clinics/{id}/doctors
     @GetMapping("/{id}/doctors")
     public ResponseEntity<List<?>> getDoctorsByClinic(@PathVariable Long id) {
         return ResponseEntity.ok(clinicService.getDoctorsByClinicId(id));
