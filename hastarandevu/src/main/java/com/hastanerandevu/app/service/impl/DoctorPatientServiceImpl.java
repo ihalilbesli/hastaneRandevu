@@ -55,7 +55,7 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
 
         // 🔥 Sadece COMPLETED randevular eklensin
         appointmentRepository.findByDoctor(currentDoctor).stream()
-                .filter(a -> a.getStatus() == Appointments.Status.COMPLETED)
+                .filter(a -> a.getStatus() == Appointments.Status.COMPLETED || a.getStatus() == Appointments.Status.AKTIF)
                 .forEach(a -> uniquePatients.add(a.getPatient()));
 
         return new ArrayList<>(uniquePatients);
