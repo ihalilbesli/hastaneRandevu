@@ -333,7 +333,7 @@ Yukarıdaki grafik verilerine göre aşağıdaki kurallara uyarak profesyonel ve
 
 
     // Ortak OpenAI gönderimi
-    private String sendToOpenAI(String prompt) {
+    protected String sendToOpenAI(String prompt) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("model", "gpt-3.5-turbo");
 
