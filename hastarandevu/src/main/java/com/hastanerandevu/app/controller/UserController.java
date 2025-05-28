@@ -1,7 +1,9 @@
 package com.hastanerandevu.app.controller;
 
+import com.hastanerandevu.app.dto.PasswordChange.PasswordChangeRequest;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.UserService;
+import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +17,10 @@ public class UserController {
     private final UserService userService;
 
 
+
     public UserController(UserService userService) {
         this.userService = userService;
+
     }
     // Email ile kullanıcı bulma             http://localhost:8080/hastarandevu/users/email{mehmet@example.com}
     @GetMapping("/email/{email}")
@@ -120,6 +124,28 @@ public class UserController {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
+    @GetMapping("/profile/me")
+    public ResponseEntity<User> getCurrentUserProfile() {
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+    //   Giriş yapan kullanıcı kendi profilini günceller
+    @PutMapping("/profile/me")
+    public ResponseEntity<User> updateCurrentUserProfile(@RequestBody User updatedUser) {
+        User currentUser = userService.getCurrentUser();
+        updatedUser.setId(currentUser.getId());
+        return ResponseEntity.ok(userService.updateUser(currentUser.getId(), updatedUser));
+    }
+
+    //  Şifre değiştirme
+    @PostMapping("/profile/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest request) {
+        userService.changePassword(request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok(Collections.singletonMap("message", "Şifre başarıyla güncellendi."));
+    }
+
+
+
 
 
 

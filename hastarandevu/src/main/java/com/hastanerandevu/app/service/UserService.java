@@ -42,4 +42,8 @@ public interface UserService {
 
     List<User> getAllUsers();
 
+    void changePassword(String oldPassword, String newPassword);
+
+    User getCurrentUser();
+
 }

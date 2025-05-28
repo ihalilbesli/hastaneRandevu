@@ -5,6 +5,7 @@ import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.UserService;
 import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,10 +16,13 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -113,27 +117,30 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public User updateUser(Long id, User updatedUser) {
-        if (!SecurityUtil.hasRole("ADMIN")) {
-            throw new RuntimeException("Sadece admin kullanıcı güncelleyebilir.");
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
+        boolean isSelfUpdate = Objects.equals(currentUser.getId(), id);
+        boolean isAdmin = SecurityUtil.hasRole("ADMIN");
+
+        if (!isAdmin && !isSelfUpdate) {
+            throw new RuntimeException("Sadece kendi hesabınızı veya admin olarak güncelleme yapabilirsiniz.");
         }
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
-
         user.setName(updatedUser.getName());
         user.setSurname(updatedUser.getSurname());
-        user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
         user.setGender(updatedUser.getGender());
         user.setBirthDate(updatedUser.getBirthDate());
         user.setBloodType(updatedUser.getBloodType());
-        user.setRole(updatedUser.getRole());
         user.setChronicDiseases(updatedUser.getChronicDiseases());
-        user.setSpecialization(updatedUser.getSpecialization());
-        if (updatedUser.getRole() == User.Role.DOKTOR) {
 
-                user.setClinic(updatedUser.getClinic());
-
+        if (isAdmin) {
+            user.setEmail(updatedUser.getEmail());
+            user.setRole(updatedUser.getRole());
+            user.setSpecialization(updatedUser.getSpecialization());
+            user.setClinic(updatedUser.getClinic());
         }
 
 
@@ -148,6 +155,34 @@ public class UserServiceImpl implements UserService {
         }
 
         return userRepository.findAll(); // Direkt User nesnelerini döndür
+    }
+    @Override
+    public void changePassword(String oldPassword, String newPassword) {
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
+        System.out.println("🔐 [1] Şifre değiştirme isteği - Kullanıcı: " + currentUser.getEmail());
+        System.out.println("🔍 [2] Girilen eski şifre (plain): " + oldPassword);
+        System.out.println("🔒 [3] Veritabanındaki şifre (encoded): " + currentUser.getPassword());
+
+        boolean match = passwordEncoder.matches(oldPassword, currentUser.getPassword());
+        System.out.println("🔎 [4] passwordEncoder.matches sonucu: " + match);
+
+        if (!match) {
+            System.out.println("❌ [5] Şifre eşleşmedi! Hata fırlatılıyor.");
+            throw new RuntimeException("Mevcut şifre yanlış.");
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        System.out.println("✅ [6] Yeni şifre hashlenmiş hali: " + encodedNewPassword);
+
+        currentUser.setPassword(encodedNewPassword);
+        userRepository.save(currentUser);
+
+        System.out.println("🎉 [7] Şifre başarıyla güncellendi - Kullanıcı: " + currentUser.getEmail());
+    }
+    @Override
+    public User getCurrentUser() {
+        return SecurityUtil.getCurrentUser(userRepository);
     }
 
 
