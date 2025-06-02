@@ -4,6 +4,7 @@ import com.hastanerandevu.app.model.Clinic;
 import com.hastanerandevu.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +35,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findBySpecializationContainingIgnoreCase(String specialization);
 
     List<User> findByClinic(Clinic clinic);
+
+    Optional<User> findByEmailAndNameAndSurnameAndBirthDate(String email, String name, String surname, String birthDate);
 }

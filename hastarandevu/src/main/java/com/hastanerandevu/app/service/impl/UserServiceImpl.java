@@ -108,6 +108,7 @@ public class UserServiceImpl implements UserService {
     public List<User> findBySpecializationContainingIgnoreCase(String specialization) {
         return userRepository.findBySpecializationContainingIgnoreCase(specialization);
     }
+
     @Override
     public void deleteUserById(Long id) {
         if (!SecurityUtil.hasRole("ADMIN")) {
@@ -115,6 +116,7 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
     }
+
     @Override
     public User updateUser(Long id, User updatedUser) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
@@ -144,7 +146,6 @@ public class UserServiceImpl implements UserService {
         }
 
 
-
         return userRepository.save(user);
     }
 
@@ -156,35 +157,25 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.findAll(); // Direkt User nesnelerini döndür
     }
+
     @Override
     public void changePassword(String oldPassword, String newPassword) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        System.out.println("🔐 [1] Şifre değiştirme isteği - Kullanıcı: " + currentUser.getEmail());
-        System.out.println("🔍 [2] Girilen eski şifre (plain): " + oldPassword);
-        System.out.println("🔒 [3] Veritabanındaki şifre (encoded): " + currentUser.getPassword());
-
         boolean match = passwordEncoder.matches(oldPassword, currentUser.getPassword());
-        System.out.println("🔎 [4] passwordEncoder.matches sonucu: " + match);
-
         if (!match) {
-            System.out.println("❌ [5] Şifre eşleşmedi! Hata fırlatılıyor.");
             throw new RuntimeException("Mevcut şifre yanlış.");
         }
 
         String encodedNewPassword = passwordEncoder.encode(newPassword);
-        System.out.println("✅ [6] Yeni şifre hashlenmiş hali: " + encodedNewPassword);
-
         currentUser.setPassword(encodedNewPassword);
         userRepository.save(currentUser);
-
-        System.out.println("🎉 [7] Şifre başarıyla güncellendi - Kullanıcı: " + currentUser.getEmail());
     }
+
     @Override
     public User getCurrentUser() {
         return SecurityUtil.getCurrentUser(userRepository);
     }
-
 
 
 }

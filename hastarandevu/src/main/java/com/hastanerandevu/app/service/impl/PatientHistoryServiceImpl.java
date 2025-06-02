@@ -115,7 +115,7 @@ public class PatientHistoryServiceImpl implements PatientHistoryService {
         }
 
         // Hasta ise sadece kendi verisine erişebilir
-        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId()!=(patientId)) {
+        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId() != (patientId)) {
             throw new RuntimeException("Sadece kendi geçmiş bilgilerinizi görüntüleyebilirsiniz.");
         }
 

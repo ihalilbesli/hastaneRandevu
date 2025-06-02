@@ -6,8 +6,6 @@ import com.hastanerandevu.app.service.AuthService;
 import com.hastanerandevu.app.util.JwtUtil;
 import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -81,4 +79,29 @@ public class AuthServiceImpl implements AuthService {
     public boolean validateToken(String token) {
         return jwtUtil.validateToken(token);
     }
+    @Override
+    public void resetPassword(String email, String name, String surname, String birthDate, String newPassword) {
+        String trimmedDate = birthDate.length() > 10 ? birthDate.substring(0, 10) : birthDate;
+        System.out.println("✂️ Doğum Tarihi (trimmed): " + trimmedDate);
+
+        // Sorguda artık String kullanıyoruz
+        Optional<User> optionalUser = userRepository.findByEmailAndNameAndSurnameAndBirthDate(email, name, surname, trimmedDate);
+
+        if (optionalUser.isEmpty()) {
+            System.out.println("❌ Kullanıcı bulunamadı veya bilgiler eşleşmiyor.");
+            System.out.println("❗ Aranan kriterler: email=" + email + ", ad=" + name + ", soyad=" + surname + ", doğumTarihi=" + trimmedDate);
+            throw new RuntimeException("Bilgiler uyuşmuyor veya kullanıcı bulunamadı.");
+        }
+
+        User user = optionalUser.get();
+        System.out.println("✅ Kullanıcı bulundu: ID=" + user.getId() + ", Email=" + user.getEmail());
+
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedNewPassword);
+        userRepository.save(user);
+
+        System.out.println("🔒 Şifre başarıyla güncellendi ve veritabanına kaydedildi.");
+    }
+
+
 }

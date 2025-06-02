@@ -13,4 +13,7 @@ public interface AuthService {
     String encodePassword(String password);
 
     boolean validateToken(String token);
+
+    void resetPassword(String email, String name, String surname, String birthDate, String newPassword);
+
 }

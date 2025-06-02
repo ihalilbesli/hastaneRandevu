@@ -1,6 +1,7 @@
 package com.hastanerandevu.app.controller;
 
 import com.hastanerandevu.app.dto.Auth.AuthResponse;
+import com.hastanerandevu.app.dto.Auth.ResetPasswordRequest;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.AuthService;
 import com.hastanerandevu.app.util.JwtUtil;
@@ -51,6 +52,21 @@ public class AuthController {
         }
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(
+                    request.getEmail(),
+                    request.getName(),
+                    request.getSurname(),
+                    request.getBirthDate(),
+                    request.getNewPassword()
+            );
+            return ResponseEntity.ok("Şifre başarıyla güncellendi.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hastanerandevu.app.controller;
 
+import com.hastanerandevu.app.model.Appointments;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.DoctorPatientService;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +41,10 @@ public class DoctorPatientController {
     public ResponseEntity<List<User>> getMyPatientsToday() {
         return ResponseEntity.ok(doctorPatientService.getMyPatientsToday());
     }
+    @GetMapping("/my-patients-today-full")
+    public ResponseEntity<List<Appointments>> getTodayAppointmentsFull() {
+        return ResponseEntity.ok(doctorPatientService.getTodayAppointmentsWithPatientInfo());
+    }
+
 
 }

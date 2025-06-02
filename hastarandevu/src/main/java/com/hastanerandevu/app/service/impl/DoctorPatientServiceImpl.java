@@ -101,4 +101,17 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
 
         return patientsToday;
     }
+
+    @Override
+    public List<Appointments> getTodayAppointmentsWithPatientInfo() {
+        User currentUser = SecurityUtil.getCurrentUser(userRepository);
+
+        if (currentUser.getRole() != User.Role.DOKTOR && currentUser.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("Sadece doktorlar veya adminler erişebilir.");
+        }
+
+        LocalDate today = LocalDate.now();
+        return appointmentRepository.findByDoctorIdAndDate(currentUser.getId(), today);
+    }
+
 }

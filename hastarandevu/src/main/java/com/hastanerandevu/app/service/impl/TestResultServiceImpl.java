@@ -70,7 +70,6 @@ public class TestResultServiceImpl implements TestResultService {
     }
 
 
-
     @Override
     public List<TestResult> getTestResultsByDoctorId(Long doctorId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);

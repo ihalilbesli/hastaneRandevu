@@ -62,7 +62,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
         }
 
         // Hasta ise sadece kendi verisine erişebilir
-        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId()!=(patientId)) {
+        if (currentUser.getRole() == User.Role.HASTA && currentUser.getId() != (patientId)) {
             throw new RuntimeException("Sadece kendi raporlarınızı görüntüleyebilirsiniz.");
         }
 
@@ -70,12 +70,11 @@ public class PatientReportsServiceImpl implements PatientReportsService {
     }
 
 
-
     @Override
     public List<PatientReports> getReportsByDoctorId(Long doctorId) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser.getId() != (doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi yazdığınız raporları görüntüleyebilirsiniz.");
         }
 
@@ -86,7 +85,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
     public List<PatientReports> getReportsByPatientIdAndPeriod(Long patientId, String period) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(patientId) && currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser.getId() != (patientId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi rapor geçmişinizi görüntüleyebilirsiniz.");
         }
 
@@ -101,7 +100,7 @@ public class PatientReportsServiceImpl implements PatientReportsService {
     public List<PatientReports> getReportsByDoctorIdAndPeriod(Long doctorId, String period) {
         User currentUser = SecurityUtil.getCurrentUser(userRepository);
 
-        if (currentUser.getId()!=(doctorId) && currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser.getId() != (doctorId) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Sadece kendi rapor geçmişinizi görüntüleyebilirsiniz.");
         }
 
