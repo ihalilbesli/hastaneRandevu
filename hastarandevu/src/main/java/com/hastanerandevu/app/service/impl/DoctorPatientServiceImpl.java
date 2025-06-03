@@ -111,7 +111,8 @@ public class DoctorPatientServiceImpl implements DoctorPatientService {
         }
 
         LocalDate today = LocalDate.now();
+
+        // Sadece bugünkü randevuları getir
         return appointmentRepository.findByDoctorIdAndDate(currentUser.getId(), today);
     }
-
 }
