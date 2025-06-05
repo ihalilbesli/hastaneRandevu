@@ -10,68 +10,93 @@ import java.util.List;
 @RestController
 @RequestMapping("/hastarandevu/prescriptions")
 public class PrescriptionController {
+
     private final PrescriptionService prescriptionService;
 
     public PrescriptionController(PrescriptionService prescriptionService) {
         this.prescriptionService = prescriptionService;
     }
-    //  Reçete oluştur (sadece doktor)
+
     @PostMapping
-    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription){
+    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
         return ResponseEntity.ok(prescriptionService.createPrescription(prescription));
     }
-    //  Tüm reçeteleri getir (admin kullanabilir)
+
     @GetMapping
-    public ResponseEntity<List<Prescription>>getAll(){
+    public ResponseEntity<List<Prescription>> getAll() {
         return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
     }
-    //  Reçeteyi ID ile getir
+
     @GetMapping("/{id}")
-    public ResponseEntity<Prescription>getById(@PathVariable Long id){
-        return ResponseEntity.ok(prescriptionService.getPrescriptionById(id));
-    }
-    //  Hastaya ait reçeteleri getir
-    @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<Prescription>> getByPatient(@PathVariable Long patientId) {
-        return ResponseEntity.ok(prescriptionService.getPrescriptionsByPatientId(patientId));
+    public ResponseEntity<Prescription> getById(@PathVariable Long id) {
+        Prescription result = prescriptionService.getPrescriptionById(id);
+        if (result == null) {
+            throw new RuntimeException("Belirtilen ID'ye ait reçete bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(result);
     }
 
-    //  Doktorun yazdığı reçeteleri getir
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<Prescription>> getByPatient(@PathVariable Long patientId) {
+        List<Prescription> list = prescriptionService.getPrescriptionsByPatientId(patientId);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Hasta ID'si " + patientId + " için reçete bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<Prescription>> getByDoctor(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(prescriptionService.getPrescriptionsByDoctorId(doctorId));
+        List<Prescription> list = prescriptionService.getPrescriptionsByDoctorId(doctorId);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Doktor ID'si " + doctorId + " için reçete bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
-    //  Hasta - zaman filtresi
+
     @GetMapping("/patient/{patientId}/filter")
     public ResponseEntity<List<Prescription>> getByPatientAndPeriod(@PathVariable Long patientId,
                                                                     @RequestParam String period) {
-        return ResponseEntity.ok(prescriptionService.getPrescriptionsByPatientIdAndPeriod(patientId, period));
+        List<Prescription> list = prescriptionService.getPrescriptionsByPatientIdAndPeriod(patientId, period);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Hasta ID'si " + patientId + " için '" + period + "' süresinde reçete bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
 
-    //  Doktor - zaman filtresi
     @GetMapping("/doctor/{doctorId}/filter")
     public ResponseEntity<List<Prescription>> getByDoctorAndPeriod(@PathVariable Long doctorId,
                                                                    @RequestParam String period) {
-        return ResponseEntity.ok(prescriptionService.getPrescriptionsByDoctorIdAndPeriod(doctorId, period));
-    }
-    //  Aciklama icindeki kelimeyle reçete arama
-    @GetMapping("/search")
-    public ResponseEntity<List<Prescription>> searchByKeyword(@RequestParam String keyword) {
-        return ResponseEntity.ok(prescriptionService.searchPrescriptionsByKeyword(keyword));
+        List<Prescription> list = prescriptionService.getPrescriptionsByDoctorIdAndPeriod(doctorId, period);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Doktor ID'si " + doctorId + " için '" + period + "' süresinde reçete bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
 
-    //  Güncelleme
+    @GetMapping("/search")
+    public ResponseEntity<List<Prescription>> searchByKeyword(@RequestParam String keyword) {
+        List<Prescription> list = prescriptionService.searchPrescriptionsByKeyword(keyword);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Anahtar kelime '" + keyword + "' ile eşleşen reçete bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Prescription> update(@PathVariable Long id,
                                                @RequestBody Prescription updated) {
-        return ResponseEntity.ok(prescriptionService.updatePrescription(id, updated));
+        Prescription result = prescriptionService.updatePrescription(id, updated);
+        if (result == null) {
+            throw new RuntimeException("Güncellenecek reçete bulunamadı. ID: " + id);
+        }
+        return ResponseEntity.ok(result);
     }
 
-    //  Silme
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         prescriptionService.deletePrescription(id);
         return ResponseEntity.noContent().build();
     }
-
 }
+

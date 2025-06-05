@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("hastarandevu/eczaneler")
+@RequestMapping("/hastarandevu/eczaneler")
 public class EczaneController {
 
     private final EczaneService eczaneService;
@@ -27,6 +27,17 @@ public class EczaneController {
     public List<EczaneDto> getPharmacies(
             @RequestParam String city,
             @RequestParam(required = false) String district) {
-        return eczaneService.getPharmacies(city, district);
+
+        if (city == null || city.trim().isEmpty()) {
+            throw new RuntimeException("Şehir parametresi boş olamaz.");
+        }
+
+        List<EczaneDto> result = eczaneService.getPharmacies(city, district);
+
+        if (result == null || result.isEmpty()) {
+            throw new RuntimeException("Eczane bilgisi bulunamadı: " + city + (district != null ? " - " + district : ""));
+        }
+
+        return result;
     }
 }

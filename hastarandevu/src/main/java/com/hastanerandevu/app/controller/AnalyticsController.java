@@ -1,4 +1,5 @@
 package com.hastanerandevu.app.controller;
+
 import com.hastanerandevu.app.dto.Analytics.*;
 import com.hastanerandevu.app.service.AnalyticsService;
 import org.springframework.http.ResponseEntity;
@@ -16,53 +17,50 @@ public class AnalyticsController {
     public AnalyticsController(AnalyticsService analyticsService) {
         this.analyticsService = analyticsService;
     }
-    // 1. Klinik bazlı randevu sayısı
+
     @GetMapping("/appointments/clinic")
     public ResponseEntity<List<ClinicAppointmentCountDTO>> getAppointmentCountByClinic() {
-        return ResponseEntity.ok(analyticsService.getAppointmentCountByClinic());
+        List<ClinicAppointmentCountDTO> data = analyticsService.getAppointmentCountByClinic();
+        if (data.isEmpty()) throw new RuntimeException("Klinik bazlı randevu verisi bulunamadı.");
+        return ResponseEntity.ok(data);
     }
 
-    // 2. Tarihe göre randevu sayısı (günlük/haftalık/aylık gibi frontend tarafı yönetebilir)
     @GetMapping("/appointments/date")
     public ResponseEntity<List<DateAppointmentCountDTO>> getAppointmentCountByDate() {
-        return ResponseEntity.ok(analyticsService.getAppointmentCountByDate());
+        List<DateAppointmentCountDTO> data = analyticsService.getAppointmentCountByDate();
+        return ResponseEntity.ok(data);
     }
 
-    // 3. Randevu durumuna göre dağılım
     @GetMapping("/appointments/status")
     public ResponseEntity<List<AppointmentStatusCountDTO>> getAppointmentCountByStatus() {
         return ResponseEntity.ok(analyticsService.getAppointmentCountByStatus());
     }
 
-    // 4. Doktor bazlı randevu sayısı
     @GetMapping("/appointments/doctor")
     public ResponseEntity<List<DoctorAppointmentCountDTO>> getAppointmentCountByDoctor() {
         return ResponseEntity.ok(analyticsService.getAppointmentCountByDoctor());
     }
 
-    // 5. Aylık yeni kullanıcı kaydı
     @GetMapping("/users/monthly")
     public ResponseEntity<List<MonthlyUserRegistrationDTO>> getMonthlyUserRegistration() {
         return ResponseEntity.ok(analyticsService.getMonthlyUserRegistration());
     }
 
-    // 6. Şikayet durumlarına göre sayılar
     @GetMapping("/complaints/status")
     public ResponseEntity<List<ComplaintStatusCountDTO>> getComplaintCountByStatus() {
         return ResponseEntity.ok(analyticsService.getComplaintCountByStatus());
     }
 
-    // 7. Kliniklere göre şikayet sayısı
     @GetMapping("/complaints/clinic")
     public ResponseEntity<List<ClinicComplaintCountDTO>> getComplaintCountByClinic() {
         return ResponseEntity.ok(analyticsService.getComplaintCountByClinic());
     }
 
-    // 8. Randevu zaman aralığına göre yoğunluk (örneğin sabah/öğle/akşam)
     @GetMapping("/appointments/time-slot")
     public ResponseEntity<List<TimeSlotAppointmentCountDTO>> getAppointmentCountByTimeSlot() {
         return ResponseEntity.ok(analyticsService.getAppointmentCountByTimeSlot());
     }
+
     @GetMapping("/users/roles")
     public ResponseEntity<List<UserRoleCountDTO>> getUserCountByRole() {
         return ResponseEntity.ok(analyticsService.getUserCountByRole());
@@ -78,14 +76,13 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getUserCountByBloodType());
     }
 
-
     @GetMapping("/clinics/doctor-count")
     public ResponseEntity<List<ClinicDoctorCountDTO>> getDoctorCountByClinic() {
         return ResponseEntity.ok(analyticsService.getDoctorCountByClinic());
     }
+
     @GetMapping("/complaints/subject")
     public ResponseEntity<List<ComplaintSubjectCountDTO>> getComplaintCountBySubject() {
         return ResponseEntity.ok(analyticsService.getComplaintCountBySubject());
     }
-
 }

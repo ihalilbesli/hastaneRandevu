@@ -19,4 +19,6 @@ public interface AccessLogRepository extends JpaRepository<AccessLog,Long> {
     //  Belirli bir tarih aralığındaki logları getir
     List<AccessLog> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
 
+    void deleteByTimestampBefore(LocalDateTime timestamp);
+
 }

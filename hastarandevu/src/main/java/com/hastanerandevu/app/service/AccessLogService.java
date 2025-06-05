@@ -2,6 +2,7 @@ package com.hastanerandevu.app.service;
 
 import com.hastanerandevu.app.model.AccessLog;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AccessLogService {
@@ -17,4 +18,6 @@ public interface AccessLogService {
     List<AccessLog> getLogsByPeriod(String period);
 
     void saveLog(AccessLog log);
+
+    void deleteLogsBefore(LocalDateTime before);
 }

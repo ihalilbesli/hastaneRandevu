@@ -5,6 +5,7 @@ import com.hastanerandevu.app.repository.AccessLogRepository;
 import com.hastanerandevu.app.repository.UserRepository;
 import com.hastanerandevu.app.service.AccessLogService;
 import com.hastanerandevu.app.util.SecurityUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -65,5 +66,11 @@ public class AccessLogServiceImpl implements AccessLogService {
         };
 
         return accessLogRepository.findByTimestampBetween(start, now);
+    }
+
+    @Override
+    @Transactional
+    public void deleteLogsBefore(LocalDateTime before) {
+        accessLogRepository.deleteByTimestampBefore(before);
     }
 }

@@ -16,54 +16,74 @@ public class PatientHistoryController {
         this.patientHistoryService = patientHistoryService;
     }
 
-    // Yeni gecmis bilgisi olustur
     @PostMapping
     public ResponseEntity<PatientHistory> cretaeHistory(@RequestBody PatientHistory history){
         return ResponseEntity.ok(patientHistoryService.createHistory(history));
     }
-    // Belirli hastanin tum gecmis bilgilerini getir
+
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<PatientHistory>> getByPatient(@PathVariable Long patientId) {
-        return ResponseEntity.ok(patientHistoryService.getHistoriesByPatientId(patientId));
+        List<PatientHistory> list = patientHistoryService.getHistoriesByPatientId(patientId);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Hasta ID'si " + patientId + " için geçmiş kaydı bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
 
-    // Belirli doktorun ekledigi kayitlari getir
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<PatientHistory>> getByDoctor(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(patientHistoryService.getHistoriesByDoctorId(doctorId));
+        List<PatientHistory> list = patientHistoryService.getHistoriesByDoctorId(doctorId);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Doktor ID'si " + doctorId + " için geçmiş kaydı bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
 
-    // Gecmis kaydi guncelle (Sadece doktor)
     @PutMapping("/{id}")
     public ResponseEntity<PatientHistory> updateHistory(@PathVariable Long id, @RequestBody PatientHistory updatedHistory) {
-        return ResponseEntity.ok(patientHistoryService.updateHistory(id, updatedHistory));
+        PatientHistory updated = patientHistoryService.updateHistory(id, updatedHistory);
+        if (updated == null) {
+            throw new RuntimeException("ID: " + id + " olan geçmiş bilgisi güncellenemedi.");
+        }
+        return ResponseEntity.ok(updated);
     }
 
-    // Gecmis kaydini sil
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHistory(@PathVariable Long id) {
         patientHistoryService.deleteHistory(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Tarihe gore filtrele (son 1 hafta, ay, yil gibi)
     @GetMapping("/patient/{patientId}/filter")
     public ResponseEntity<List<PatientHistory>> filterByPeriod(@PathVariable Long patientId, @RequestParam String period) {
-        return ResponseEntity.ok(patientHistoryService.getHistoriesByPatientIdAndPeriod(patientId, period));
+        List<PatientHistory> list = patientHistoryService.getHistoriesByPatientIdAndPeriod(patientId, period);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Hasta ID'si " + patientId + " için '" + period + "' süresinde geçmiş kaydı bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
 
-    // Tani icinde anahtar kelimeye gore arama yap
     @GetMapping("/search/diagnosis")
     public ResponseEntity<List<PatientHistory>> searchByDiagnosis(@RequestParam String keyword) {
-        return ResponseEntity.ok(patientHistoryService.searchHistoriesByDiagnosis(keyword));
+        List<PatientHistory> list = patientHistoryService.searchHistoriesByDiagnosis(keyword);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Tani içinde '" + keyword + "' içeren kayıt bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
-    // Tedaviye (treatment) gore arama yapar
+
     @GetMapping("/search/treatment")
     public ResponseEntity<List<PatientHistory>> searchByTreatment(@RequestParam String keyword) {
-        return ResponseEntity.ok(patientHistoryService.searchHistoriesByTreatment(keyword));
+        List<PatientHistory> list = patientHistoryService.searchHistoriesByTreatment(keyword);
+        if (list.isEmpty()) {
+            throw new RuntimeException("Tedavi içinde '" + keyword + "' içeren kayıt bulunamadı.");
+        }
+        return ResponseEntity.ok(list);
     }
+
     @GetMapping
     public ResponseEntity<List<PatientHistory>> getAllHistories() {
         return ResponseEntity.ok(patientHistoryService.getAllHistories());
     }
 }
+

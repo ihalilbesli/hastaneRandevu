@@ -3,7 +3,6 @@ package com.hastanerandevu.app.controller;
 import com.hastanerandevu.app.model.Appointments;
 import com.hastanerandevu.app.repository.AppointmentRepository;
 import com.hastanerandevu.app.service.AppointmentService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/hastarandevu/appointments")
@@ -24,68 +23,76 @@ public class AppointmentController {
         this.appointmentRepository = appointmentRepository;
     }
 
-    // Randevu oluştur
+    //  Randevu oluştur
     @PostMapping
-    public ResponseEntity<Appointments> createAppointment(@RequestBody Appointments appointments){
-        Appointments saved=appointmentService.createAppointment(appointments);
+    public ResponseEntity<Appointments> createAppointment(@RequestBody Appointments appointments) {
+        if (appointments.getPatient() == null || appointments.getDoctor() == null || appointments.getDate() == null || appointments.getTime() == null) {
+            throw new RuntimeException("Hasta, doktor, tarih ve saat alanları boş olamaz.");
+        }
+        Appointments saved = appointmentService.createAppointment(appointments);
         return ResponseEntity.ok(saved);
     }
 
-    //Tum randevulari getir
-    @GetMapping()
-    public ResponseEntity<List<Appointments>> getAllAppointments(){
+    //  Tüm randevuları getir
+    @GetMapping
+    public ResponseEntity<List<Appointments>> getAllAppointments() {
         return ResponseEntity.ok(appointmentService.getAllAppointments());
     }
 
     //  ID ile randevu getir
     @GetMapping("/{id}")
-    public ResponseEntity<Appointments>getAppointmentById(@PathVariable Long id){
-        Optional<Appointments> optionalAppointments=appointmentService.getAppointmentById(id);
-        if (optionalAppointments.isPresent()){
-            return ResponseEntity.ok(optionalAppointments.get());
-        }else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Appointments> getAppointmentById(@PathVariable Long id) {
+        return appointmentService.getAppointmentById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new RuntimeException("ID ile randevu bulunamadı: " + id));
     }
-    //  Doktora ait randevular
+
+    // Doktorun randevuları
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<Appointments>> getAppointmentsByDoctor(@PathVariable Long doctorId){
+    public ResponseEntity<List<Appointments>> getAppointmentsByDoctor(@PathVariable Long doctorId) {
         return ResponseEntity.ok(appointmentService.getAppointmensByDoctorId(doctorId));
     }
 
-    //  Doktor uygun mu? (tarih + saat)
+    // Belirli tarih ve saate göre doktor uygun mu
     @GetMapping("/available")
-    public ResponseEntity<Boolean> checkDoctorAvailablity(
+    public ResponseEntity<Boolean> checkDoctorAvailability(
             @RequestParam Long doctorId,
             @RequestParam String date,
-            @RequestParam String time
-    ){
-        boolean available=appointmentService.isDoctorAvailable(
+            @RequestParam String time) {
+
+        if (doctorId == null || date.isBlank() || time.isBlank()) {
+            throw new RuntimeException("Doktor, tarih ve saat zorunludur.");
+        }
+
+        boolean available = appointmentService.isDoctorAvailable(
                 doctorId, LocalDate.parse(date), LocalTime.parse(time)
         );
         return ResponseEntity.ok(available);
     }
-    //  Randevuyu sil
+
+    //  Randevu sil
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable long id){
+    public ResponseEntity<Void> deleteAppointment(@PathVariable long id) {
         appointmentService.deteAppointment(id);
         return ResponseEntity.noContent().build();
     }
 
-    //Doktorun musait randevu saatlerini dondurur
+    //  Doktorun belirli tarihli randevuları
     @GetMapping("/doctor/{id}/date")
     public ResponseEntity<List<Appointments>> getAppointmentsByDoctorAndDate(
             @PathVariable Long id,
             @RequestParam String date) {
         LocalDate localDate = LocalDate.parse(date);
-        List<Appointments> appointments = appointmentService.getAppointmentsByDoctorIdAndDate(id, localDate);
-        return ResponseEntity.ok(appointments);
+        return ResponseEntity.ok(appointmentService.getAppointmentsByDoctorIdAndDate(id, localDate));
     }
+
+    //  Hastaya ait randevular
     @GetMapping("/patient/{id}")
     public ResponseEntity<List<Appointments>> getAppointmentsByPatient(@PathVariable Long id) {
-        List<Appointments> appointments = appointmentService.getAppointemnrsByPatientId(id);
-        return ResponseEntity.ok(appointments);
+        return ResponseEntity.ok(appointmentService.getAppointemnrsByPatientId(id));
     }
+
+    //  Randevu iptal
     @PutMapping("/{id}/cancel")
     public ResponseEntity<Map<String, String>> cancelAppointment(@PathVariable Long id) {
         Appointments appointment = appointmentRepository.findById(id)
@@ -96,35 +103,35 @@ public class AppointmentController {
             appointmentRepository.save(appointment);
             return ResponseEntity.ok(Map.of("message", "Randevu iptal edildi."));
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Randevu zaten iptal edilmiş."));
+            throw new RuntimeException("Randevu zaten iptal edilmiş.");
         }
     }
+
+    //  Durum güncelleme
     @PutMapping("/{id}/status")
     public ResponseEntity<Appointments> updateAppointmentStatus(
             @PathVariable Long id,
             @RequestParam("status") Appointments.Status status,
             @RequestParam(value = "note", required = false) String note) {
 
-        Appointments updated = appointmentService.updateStatus(id, status, note);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(appointmentService.updateStatus(id, status, note));
     }
-    //  Zaman aralığına göre tüm randevular (sadece admin)
+
+    //  Zaman aralığına göre filtreleme
     @GetMapping("/filter")
     public ResponseEntity<List<Appointments>> getAllAppointmentsByPeriod(@RequestParam String period) {
         return ResponseEntity.ok(appointmentService.getAllAppointmentsByPeriod(period));
     }
 
-    //  Açıklamada anahtar kelime ile arama (sadece admin)
+    //  Açıklamaya göre arama
     @GetMapping("/search")
     public ResponseEntity<List<Appointments>> searchAppointmentsByKeyword(@RequestParam String keyword) {
         return ResponseEntity.ok(appointmentService.searchAppointmentsByKeyword(keyword));
     }
 
-    //  Belirli durumdaki randevu sayısını getir (istatistik için)
+    //  Belirli durumdaki randevuların sayısı
     @GetMapping("/count")
     public ResponseEntity<Long> countAppointmentsByStatus(@RequestParam Appointments.Status status) {
         return ResponseEntity.ok(appointmentService.countAppointmentsByStatus(status));
     }
-
 }

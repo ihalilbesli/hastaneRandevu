@@ -53,10 +53,9 @@ public class AccessLogAspect {
 
         HttpServletRequest request = attributes.getRequest();
 
-        // 🚨 Eksik olan kontrol burada
         String email = SecurityUtil.getCurrentUserId();
         if ("anonymousUser".equals(email)) {
-            return; // Token yok, kimlik doğrulama yapılmamış. Loglama.
+            return; // Token yoksa loglama yapılmaz
         }
 
         User user = userRepository.findByEmail(email)
@@ -81,8 +80,14 @@ public class AccessLogAspect {
         log.setStatus(status);
         log.setErrorMessage(errorMessage);
 
+        // ✅ Eski logları sil (1 haftadan eski olanları)
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        accessLogService.deleteLogsBefore(oneWeekAgo);
+
+        // ✅ Yeni logu kaydet
         accessLogService.saveLog(log);
     }
+
 
 
     private String extractEntityName(JoinPoint joinPoint) {

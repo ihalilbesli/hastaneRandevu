@@ -16,120 +16,93 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
 
-
-
     public UserController(UserService userService) {
         this.userService = userService;
+    }
 
-    }
-    // Email ile kullanıcı bulma             http://localhost:8080/hastarandevu/users/email{mehmet@example.com}
+    //  Email ile kullanıcı bulma
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email){
-        Optional<User> userOptional=userService.findByEmail(email);
-        if (userOptional.isPresent()) {
-            return ResponseEntity.ok(userOptional.get());  // Kullanıcı bulunduysa 200 OK döndü
-        }
-        else {
-            return ResponseEntity.notFound().build(); // Kullanıcı bulunamazsa 404 Not Found döndür
-        }
+    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(
+                userService.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Email ile kullanıcı bulunamadı: " + email))
+        );
     }
-    //Rol bilgisine gore siralama
+
+    //  Rol bilgisine göre listeleme
     @GetMapping("/role/{role}")
-    public ResponseEntity<List<User>> getUserByRole(@PathVariable User.Role role){
-        List<User> users=userService.findUsersByRole(role);
-        if (!users.isEmpty()){
-            return ResponseEntity.ok(users); // Kullanıcılar varsa 200 OK döndür
-        }
-        else
-            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
+    public ResponseEntity<List<User>> getUserByRole(@PathVariable User.Role role) {
+        return ResponseEntity.ok(userService.findUsersByRole(role));
     }
-    // ID ile kullanıcıyı getir
+
+    //  ID ile kullanıcı getirme
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        Optional<User> optionalUser=userService.getUserById(id);
-        if (optionalUser.isPresent()){
-            return ResponseEntity.ok(optionalUser.get());// Kullanıcı bulunduysa 200 OK döndü
-        }
-        else {
-            return ResponseEntity.notFound().build();// Kullanıcı bulunamazsa 404 Not Found döndür
-        }
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                userService.getUserById(id)
+                        .orElseThrow(() -> new RuntimeException("ID ile kullanıcı bulunamadı: " + id))
+        );
     }
-    // Telefon numarası ile kullanıcı bulma
+
+    //  Telefon numarası ile kullanıcı getirme
     @GetMapping("/phone/{phoneNumber}")
     public ResponseEntity<User> getUserByPhoneNumber(@PathVariable String phoneNumber) {
-        Optional<User> userOptional = userService.findByPhoneNumber(phoneNumber);
-
-        if (userOptional.isPresent()) {
-            return ResponseEntity.ok(userOptional.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(
+                userService.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new RuntimeException("Telefon numarası ile kullanıcı bulunamadı: " + phoneNumber))
+        );
     }
-    // İsme göre kullanıcı arama
+
+    //  İsme göre kullanıcı arama
     @GetMapping("/name/{name}")
     public ResponseEntity<List<User>> getUsersByName(@PathVariable String name) {
-        List<User> users = userService.findByNameContainingIgnoreCase(name);
-
-        if (!users.isEmpty()) {
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
-        }
+        return ResponseEntity.ok(userService.findByNameContainingIgnoreCase(name));
     }
-    // Cinsiyete göre kullanıcı listeleme
+
+    //  Cinsiyete göre kullanıcı listeleme
     @GetMapping("/gender/{gender}")
     public ResponseEntity<List<User>> getUsersByGender(@PathVariable User.Gender gender) {
-        List<User> users = userService.findByGender(gender);
-
-        if (!users.isEmpty()) {
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
-        }
+        return ResponseEntity.ok(userService.findByGender(gender));
     }
-    // Kan grubuna göre hasta listeleme
+
+    //  Kan grubuna göre hasta listeleme
     @GetMapping("/blood-type/{bloodType}")
     public ResponseEntity<List<User>> getUsersByBloodType(@PathVariable User.Bloodtype bloodType) {
-        List<User> users = userService.findByBloodType(bloodType);
-
-        if (!users.isEmpty()) {
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
-        }
+        return ResponseEntity.ok(userService.findByBloodType(bloodType));
     }
-    // Uzmanlık alanına göre doktorları listeleme
+
+    //  Uzmanlık alanına göre doktorları listeleme
     @GetMapping("/specialization/{specialization}")
     public ResponseEntity<List<User>> getUsersBySpecialization(@PathVariable String specialization) {
-        List<User> users = userService.findBySpecializationContainingIgnoreCase(specialization);
-
-        if (!users.isEmpty()) {
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());// Boş listeyi 200 OK ile döndür
-        }
+        return ResponseEntity.ok(userService.findBySpecializationContainingIgnoreCase(specialization));
     }
+
+    //  Kullanıcı silme
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
+
+    //  Kullanıcı güncelleme (Admin)
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         return ResponseEntity.ok(userService.updateUser(id, updatedUser));
     }
 
+    //  Tüm kullanıcıları listele
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
+
+    //  Mevcut giriş yapan kullanıcıyı getir
     @GetMapping("/profile/me")
     public ResponseEntity<User> getCurrentUserProfile() {
         return ResponseEntity.ok(userService.getCurrentUser());
     }
 
-    //   Giriş yapan kullanıcı kendi profilini günceller
+    //  Mevcut giriş yapan kullanıcı kendi profilini günceller
     @PutMapping("/profile/me")
     public ResponseEntity<User> updateCurrentUserProfile(@RequestBody User updatedUser) {
         User currentUser = userService.getCurrentUser();
@@ -143,10 +116,7 @@ public class UserController {
         userService.changePassword(request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok(Collections.singletonMap("message", "Şifre başarıyla güncellendi."));
     }
-
-
-
-
-
-
 }
+
+
+
