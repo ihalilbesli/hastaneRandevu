@@ -3,6 +3,16 @@
 Bu proje, hastaların doktorlardan randevu almasını sağlayan yapay zeka destekli bir sistemin Java Spring Boot ile geliştirilmiş backend uygulamasıdır. Sistem; hasta, doktor ve admin olmak üzere üç farklı kullanıcı türü sunar. Randevu oluşturma, şikayet bildirme, kullanıcı yönetimi gibi modülleri içeren bu sistem, doğal dil işleme (NLP) kullanarak şikayetlere uygun poliklinik önerilerinde de bulunur.
 
 
+
+### 🧩 Genel Sistem Mimarisi
+
+Aşağıdaki diyagram, sistemin kullanıcılar, arayüzler (web ve mobil), backend, veritabanı ve harici API (OpenAI) ile nasıl entegre çalıştığını göstermektedir:
+
+
+<img src="https://github.com/user-attachments/assets/87414ceb-07a5-4f99-b5b7-5838e7ff7f71" alt="diyagram" width="400"/>
+
+
+
 ## ⚙️ Sistem Özellikleri ve Roller
 
 Bu sistem; **Hasta**, **Doktor** ve **Admin** olmak üzere üç farklı kullanıcı rolüne sahiptir. Kullanıcılar kendilerine özel paneller aracılığıyla sisteme erişir. Yapay zeka destekli poliklinik önerisi, nöbetçi eczane sorgulama ve rol bazlı işlem yetkileri ile sistem fonksiyonel, modern ve güvenli bir yapıya sahiptir.
@@ -61,6 +71,14 @@ Bu sistem; **Hasta**, **Doktor** ve **Admin** olmak üzere üç farklı kullanı
 - Kullanıcı, bu öneriler üzerinden doğrudan randevu oluşturabilir.
 
 ---
+
+### 🧠 Yapay Zeka İşleyiş Diyagramı
+
+Aşağıdaki görsel, hastanın şikayet metni girdikten sonra yapay zeka tarafından analiz edilmesi, klinik önerisi sunulması ve admin paneline veri aktarımı gibi adımları göstermektedir:
+
+
+<img src="https://github.com/user-attachments/assets/c229a09a-2659-44a6-bf78-dfef126073b6" alt="ai" width="400"/>
+
 
 ### 🧪 Nöbetçi Eczane Modülü
 
@@ -215,6 +233,91 @@ src
 
 
 ✅ Bu yapı, projeni anlamak isteyen herkes için anlaşılır ve düzenli bir rehber sunar.  
+
+## 🗄️ Veritabanı Modelleri (Entity Yapısı)
+
+Sistem, aşağıdaki temel modelleri (Entity sınıfları) kullanır. Bu yapı, projenin veri modelini ve ilişkilerini anlamak açısından referans niteliğindedir.
+
+### 👤 User (Kullanıcı)
+
+| Alan            | Tipi       | Açıklama                                |
+|-----------------|------------|-----------------------------------------|
+| id              | Long       | Benzersiz kullanıcı ID’si               |
+| name, surname   | String     | Ad ve soyad                             |
+| email           | String     | Giriş için e-posta (benzersiz)          |
+| password        | String     | BCrypt ile şifrelenmiş parola           |
+| role            | Enum       | HASTA, DOKTOR, ADMIN                    |
+| phoneNumber     | String     | İletişim bilgisi                        |
+| gender          | Enum       | ERKEK, KADIN, BELIRTILMEMIS             |
+| birthDate       | String     | Doğum tarihi (yyyy-MM-dd)              |
+| bloodType       | Enum       | Kan grubu bilgisi                       |
+| chronicDiseases | String     | Kronik hastalık varsa                   |
+| specialization  | String     | Uzmanlık alanı (doktorlar için)         |
+| clinic          | Clinic     | Kullanıcının bağlı olduğu klinik        |
+
+---
+
+### 📅 Appointment (Randevu)
+
+| Alan        | Tipi     | Açıklama                              |
+|-------------|----------|---------------------------------------|
+| id          | Long     | Randevu ID                            |
+| patient     | User     | Randevu alan hasta                    |
+| doctor      | User     | Randevuyu verecek doktor              |
+| date        | LocalDate| Randevu tarihi                        |
+| time        | LocalTime| Saat bilgisi                          |
+| description | String   | Hasta açıklaması                      |
+| clinic      | Clinic   | Randevunun ait olduğu klinik          |
+| status      | Enum     | AKTIF, IPTAL_EDILDI, COMPLETED, vb.   |
+
+---
+
+### 💊 Prescription (Reçete)
+
+| Alan             | Tipi     | Açıklama                            |
+|------------------|----------|-------------------------------------|
+| id               | Long     | Reçete ID                           |
+| prescriptionCode | String   | Reçete kodu (benzersiz)             |
+| patient          | User     | Reçete verilen hasta                |
+| doctor           | User     | Reçeteyi yazan doktor               |
+| medications      | String   | Yazılan ilaçlar (virgülle ayrılmış) |
+| date             | LocalDate| Reçete tarihi                       |
+| description      | String   | Açıklama (isteğe bağlı)             |
+
+---
+
+### 📋 Complaint (Şikayet)
+
+| Alan        | Tipi     | Açıklama                                |
+|-------------|----------|-------------------------------------------|
+| id          | Long     | Şikayet ID’si                            |
+| user        | User     | Şikayet gönderen kullanıcı               |
+| subject     | String   | Şikayet konusu                           |
+| content     | String   | Şikayet metni                            |
+| clinic      | Clinic   | İlgili klinik (opsiyonel)                |
+| status      | Enum     | BEKLEMEDE, INCELEMEDE, COZULDU           |
+| adminNote   | String   | Admin notu (varsa)                       |
+| createdAt   | LocalDate| Oluşturulma tarihi                       |
+
+---
+
+### 🧪 TestResult (Test Sonucu)
+
+| Alan          | Tipi     | Açıklama                          |
+|---------------|----------|-----------------------------------|
+| id            | Long     | Test sonucu ID’si                |
+| patient       | User     | Sonucu olan hasta                |
+| doctor        | User     | Ekleyen doktor                   |
+| testName      | String   | Test adı (örn. Kan Tahlili)      |
+| result        | String   | Test sonucu                      |
+| doctorComment | String   | Doktor yorumu (opsiyonel)        |
+| testDate      | LocalDate| Testin yapıldığı tarih           |
+| testType      | Enum     | KAN_TAHLILI, MRI, vb.            |
+
+---
+
+📝 Not: Diğer modeller (PatientReport, PatientHistory, Clinic, AccessLog vb.) de benzer şekilde yapılandırılmıştır ve entity klasöründe yer almaktadır.
+
 
 ## 📌 API Endpoint Özeti
 
