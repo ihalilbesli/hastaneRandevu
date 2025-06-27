@@ -47,7 +47,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Doktorun bağlı olduğu bir klinik bulunamadı.");
         }
 
-        // ✅ Mevcut randevu kontrolü: aynı hasta aynı klinikten aktif randevusu varsa iptal edilir
+        // Mevcut randevu kontrolü: aynı hasta aynı klinikten aktif randevusu varsa iptal edilir
         Optional<Appointments> existing = appointmentRepository
                 .findByPatientIdAndClinicAndStatus(patient.getId(), doctor.getClinic(), Appointments.Status.AKTIF);
 

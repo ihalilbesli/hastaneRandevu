@@ -22,4 +22,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
 
     // Açıklama içinde geçen kelimeye göre arama
     List<Prescription> findByDescriptionContainingIgnoreCase(String keyword);
+
+    boolean existsByPatientId(Long patientId);
+    boolean existsByDoctorId(Long doctorId);
+
 }

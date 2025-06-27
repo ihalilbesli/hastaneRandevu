@@ -1,9 +1,10 @@
 package com.hastanerandevu.app.service.impl;
 
 import com.hastanerandevu.app.model.User;
-import com.hastanerandevu.app.repository.UserRepository;
+import com.hastanerandevu.app.repository.*;
 import com.hastanerandevu.app.service.UserService;
 import com.hastanerandevu.app.util.SecurityUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,22 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    private final PatientHistoryRepository patientHistoryRepository;
+    private final PatientReportRepository patientReportRepository;
+    private final TestResultRepository testResultRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, AppointmentRepository appointmentRepository, PrescriptionRepository prescriptionRepository, PatientHistoryRepository patientHistoryRepository, PatientReportRepository patientReportRepository, TestResultRepository testResultRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.prescriptionRepository = prescriptionRepository;
+        this.patientHistoryRepository = patientHistoryRepository;
+        this.patientReportRepository = patientReportRepository;
+        this.testResultRepository = testResultRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -110,12 +121,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUserById(Long id) {
         if (!SecurityUtil.hasRole("ADMIN")) {
             throw new RuntimeException("Sadece admin kullanıcı silebilir.");
         }
-        userRepository.deleteById(id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
+
+        // HASTA olarak ilişkili veriler
+        boolean hasAppointments = appointmentRepository.existsByPatientId(id);
+        boolean hasPrescriptions = prescriptionRepository.existsByPatientId(id);
+        boolean hasHistories = patientHistoryRepository.existsByPatientId(id);
+        boolean hasReports = patientReportRepository.existsByPatientId(id);
+        boolean hasTestResults = testResultRepository.existsByPatientId(id);
+
+        // DOKTOR olarak ilişkili veriler
+        boolean hasDoctorAppointments = appointmentRepository.existsByDoctorId(id);
+        boolean hasDoctorPrescriptions = prescriptionRepository.existsByDoctorId(id);
+        boolean hasDoctorHistories = patientHistoryRepository.existsByDoctorId(id);
+        boolean hasDoctorReports = patientReportRepository.existsByDoctorId(id);
+        boolean hasDoctorTestResults = testResultRepository.existsByDoctorId(id);
+
+        if (hasAppointments || hasPrescriptions || hasHistories || hasReports || hasTestResults ||
+                hasDoctorAppointments || hasDoctorPrescriptions || hasDoctorHistories || hasDoctorReports || hasDoctorTestResults) {
+            throw new RuntimeException("Bu kullanıcıya ait sağlık verileri bulunduğu için silinemez.");
+        }
+
+        userRepository.delete(user);
     }
+
+
 
     @Override
     public User updateUser(Long id, User updatedUser) {

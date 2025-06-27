@@ -65,7 +65,8 @@ public interface AppointmentRepository extends JpaRepository<Appointments,Long> 
 """)
     List<Clinic> findTopClinicsByDate(@Param("date") LocalDate date);
 
-
+    boolean existsByPatientId(Long patientId);
+    boolean existsByDoctorId(Long doctorId);
 
 
 

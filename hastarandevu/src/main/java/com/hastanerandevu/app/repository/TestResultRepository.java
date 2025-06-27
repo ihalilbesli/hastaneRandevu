@@ -20,5 +20,7 @@ public interface TestResultRepository extends JpaRepository<TestResult,Long> {
 
     // Doktorun son X günde eklediği testler
     List<TestResult> findByDoctorAndTestDateAfter(User doctor, LocalDate date);
+    boolean existsByPatientId(Long patientId);
+    boolean existsByDoctorId(Long doctorId);
 
 }

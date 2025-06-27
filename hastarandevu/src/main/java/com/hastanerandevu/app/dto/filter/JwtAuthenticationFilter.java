@@ -1,4 +1,4 @@
-package com.hastanerandevu.app.filter;
+package com.hastanerandevu.app.dto.filter;
 
 import com.hastanerandevu.app.service.impl.CustomUserDetailsService;
 import com.hastanerandevu.app.util.JwtUtil;

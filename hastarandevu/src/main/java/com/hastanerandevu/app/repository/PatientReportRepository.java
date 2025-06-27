@@ -30,4 +30,8 @@ public interface PatientReportRepository extends JpaRepository<PatientReports,Lo
     // Anahtar kelimeyle rapor türüne göre arama
     List<PatientReports> findByReportTypeContainingIgnoreCase(String keyword);
 
+    boolean existsByPatientId(Long patientId);
+    boolean existsByDoctorId(Long doctorId);
+
+
 }

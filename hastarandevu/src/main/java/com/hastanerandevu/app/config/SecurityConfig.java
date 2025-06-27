@@ -1,6 +1,6 @@
 package com.hastanerandevu.app.config;
 
-import com.hastanerandevu.app.filter.JwtAuthenticationFilter;
+import com.hastanerandevu.app.dto.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/hastarandevu/auth/**").permitAll()
-                        .requestMatchers("/hastarandevu/**").permitAll()//Gecici olarak tum endpointler
+                        .requestMatchers("/hastarandevu/**").permitAll()
                         .requestMatchers( "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html").permitAll()//Gecici olarak tum endpointler

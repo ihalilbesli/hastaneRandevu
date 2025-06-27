@@ -3,13 +3,11 @@ package com.hastanerandevu.app.controller;
 import com.hastanerandevu.app.dto.PasswordChange.PasswordChangeRequest;
 import com.hastanerandevu.app.model.User;
 import com.hastanerandevu.app.service.UserService;
-import com.hastanerandevu.app.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/hastarandevu/users")

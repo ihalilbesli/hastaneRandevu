@@ -18,6 +18,9 @@ public interface PatientHistoryRepository extends JpaRepository<PatientHistory,L
     List<PatientHistory> findByDiagnosisContainingIgnoreCase(String keyword);
     List<PatientHistory> findByTreatmentContainingIgnoreCase(String keyword);
 
+    boolean existsByPatientId(Long patientId);
+    boolean existsByDoctorId(Long doctorId);
+
 
 
 

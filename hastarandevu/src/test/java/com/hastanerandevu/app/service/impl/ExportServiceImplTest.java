@@ -2,9 +2,7 @@ package com.hastanerandevu.app.service.impl;
 
 import com.hastanerandevu.app.model.*;
 import com.hastanerandevu.app.repository.*;
-import com.hastanerandevu.app.service.ExportService;
 import com.hastanerandevu.app.util.SecurityUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +16,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 import org.mockito.MockedStatic;
 
